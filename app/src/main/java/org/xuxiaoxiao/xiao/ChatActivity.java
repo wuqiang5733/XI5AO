@@ -6,13 +6,15 @@ import android.widget.FrameLayout;
 
 public class ChatActivity extends UniversalFragmentActivity implements ChatFragment.Callbacks,FunctionPageView.Callbacks{
 
+//    private FrameLayout frameLayout;
+
     @Override
     protected Fragment createFragment() {
         return new ChatFragment();
     }
 
     @Override
-    public void onEmotionSelected() {
+    public void onFunctionPanelSelected() {
 
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.bottom_fragment_container);
         frameLayout.setVisibility((frameLayout.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
@@ -30,6 +32,13 @@ public class ChatActivity extends UniversalFragmentActivity implements ChatFragm
                     .replace(R.id.bottom_fragment_container, emotionPageView)
                     .commit();
         }
+    }
+
+    @Override
+    public void hideFunctionPanel() {
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.bottom_fragment_container);
+
+        frameLayout.setVisibility(View.GONE);
     }
 
     @Override

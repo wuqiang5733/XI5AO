@@ -10,6 +10,7 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,11 @@ import java.util.ArrayList;
  */
 
 public class FunctionPageView extends BaseFragment {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("WQ","onDestroy");
+    }
 
     static private Callbacks callbacks;
 
@@ -39,12 +45,14 @@ public class FunctionPageView extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         callbacks = (Callbacks) context;
+        Log.d("WQ","onAttach");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        callbacks = null;
+//        callbacks = null;
+        Log.d("WQ","onDetach");
     }
 
     @Override

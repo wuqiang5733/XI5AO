@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -50,7 +51,7 @@ public class ChatFragment extends BaseFragment {
     private String mUsername;
     private SyncReference mWilddogRef;
     private ValueEventListener mConnectedListener;
-    private MessageAdapter mChatListAdapter;
+//    private MessageAdapter mChatListAdapter;
     private EditText inputText;
 
     // 一个实现 Callbacks 的对象，
@@ -58,6 +59,7 @@ public class ChatFragment extends BaseFragment {
     // 并赋给这个变量
     private Callbacks mCallbacks;
     private MessageAdapter messageAdapter;
+    private RecyclerView messageRecyclerView;
 
 
     /**
@@ -68,7 +70,8 @@ public class ChatFragment extends BaseFragment {
         // 只要一个 Activity实现了这个接口
         // Fragment 就有了可以调用 Activity 当中 函数的办法
 //        void onCrimeSelected(Crime crime);
-        void onEmotionSelected();
+        void onFunctionPanelSelected();
+        void hideFunctionPanel();
     }
 
     @Override
@@ -101,6 +104,7 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+//        updateUI();
 //        Log.d("WQ",mChatListAdapter.toString());
 //        Log.d("WQ",ListView.toString());
     }
@@ -132,7 +136,8 @@ public class ChatFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         mWilddogRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
-        messageAdapter.cleanup();
+        // 不要 messageAdapter.cleanup(); 程序 就不会Crash 不知道为什么
+//        messageAdapter.cleanup();
     }
 
 //    private void setupUsername() {
@@ -165,16 +170,23 @@ public class ChatFragment extends BaseFragment {
         mWilddogRef.child(key).setValue(chat);
         inputText.setText("");
     }
+    public void showKeyboard(View v) {
+        InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.showSoftInput(inputText, InputMethodManager.SHOW_IMPLICIT);
+    }
 
+    public void hideKeyboard(View v) {
+        InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.hideSoftInputFromWindow(inputText.getWindowToken(), 0);
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 //        return super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.chat_top_fragment, container, false);
-        final RecyclerView messageRecyclerView = (RecyclerView) view.findViewById(R.id.message_recycler_view);
+        final View view = inflater.inflate(R.layout.chat_top_fragment, container, false);
+        messageRecyclerView = (RecyclerView) view.findViewById(R.id.message_recycler_view);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(50));
-        messageRecyclerView.setAdapter(messageAdapter);
+        updateUI();
 
         Button sendEmotion = (Button)view.findViewById(R.id.function_button);
 
@@ -182,7 +194,9 @@ public class ChatFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 // 点击，跳出表情包部分
-                mCallbacks.onEmotionSelected();
+                hideKeyboard(view);
+                inputText.clearFocus();
+                mCallbacks.onFunctionPanelSelected();
             }
         });
 
@@ -220,8 +234,42 @@ public class ChatFragment extends BaseFragment {
         });
 
         inputText = (EditText) view.findViewById(R.id.message_input);
+        inputText.setOnFocusChangeListener(new android.view.View.OnFocusChangeListener() {
+            // 输入信息文本获得焦点时
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    // 此处为得到焦点时的处理内容
+//                    mHiddenView.setVisibility(View.GONE);
+                    mCallbacks.hideFunctionPanel();
+
+                } else {
+                    // 此处为失去焦点时的处理内容
+                }
+            }
+        });
 
         return view;
+    }
+    public void updateUI() {
+        // 这个方法是在 onResume 方法当中调用的，
+        // 也就是让整个 View 在页面重新呈现的时候
+        // 用全新的数据刷新一下，
+        // 因为所有的操作其实都是针对  Model(数据) 的，
+        // 所以 Model 变化之后，View也应该及时的刷新
+//        CrimeLab crimeLab = CrimeLab.get(getActivity());
+//        List<Crime> crimes = crimeLab.getCrimes();
+
+        if (messageAdapter == null) {
+            messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(20));
+            messageRecyclerView.setAdapter(messageAdapter);
+        } else {
+//            mAdapter.setCrimes(crimes);
+            // 让所有的数据都更新，非常没有效率
+            messageAdapter.notifyDataSetChanged();
+        }
+        // 更新 UI 的时候，连同 Subtitle 一起更新
+//        updateSubtitle();
     }
 
     private class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
