@@ -196,6 +196,7 @@ public class ChatFragment extends BaseFragment {
                 // 点击，跳出表情包部分
                 hideKeyboard(view);
                 inputText.clearFocus();
+                messageAdapter.notifyDataSetChanged();
                 mCallbacks.onFunctionPanelSelected();
             }
         });
@@ -242,9 +243,11 @@ public class ChatFragment extends BaseFragment {
                     // 此处为得到焦点时的处理内容
 //                    mHiddenView.setVisibility(View.GONE);
                     mCallbacks.hideFunctionPanel();
+                    messageAdapter.notifyDataSetChanged();
 
                 } else {
                     // 此处为失去焦点时的处理内容
+                    messageAdapter.notifyDataSetChanged();
                 }
             }
         });
