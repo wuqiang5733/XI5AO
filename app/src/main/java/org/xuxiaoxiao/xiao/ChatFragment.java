@@ -1,5 +1,6 @@
 package org.xuxiaoxiao.xiao;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,6 +52,36 @@ public class ChatFragment extends BaseFragment {
     private ValueEventListener mConnectedListener;
     private MessageAdapter mChatListAdapter;
     private EditText inputText;
+
+    // 一个实现 Callbacks 的对象，
+    // 将来会 在 onAttach 方法当中 把 Activity 转换成 Callbacks
+    // 并赋给这个变量
+    private Callbacks mCallbacks;
+    private MessageAdapter messageAdapter;
+
+
+    /**
+     * Required interface for hosting activities.
+     */
+    public interface Callbacks {
+        // 接口定义了需要 Activity 做的事情
+        // 只要一个 Activity实现了这个接口
+        // Fragment 就有了可以调用 Activity 当中 函数的办法
+//        void onCrimeSelected(Crime crime);
+        void onEmotionSelected();
+    }
+
+    @Override
+    // 注意传进来的是 Context
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,7 +132,7 @@ public class ChatFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         mWilddogRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
-        mChatListAdapter.cleanup();
+        messageAdapter.cleanup();
     }
 
 //    private void setupUsername() {
@@ -126,6 +158,13 @@ public class ChatFragment extends BaseFragment {
             inputText.setText("");
         }
     }
+    public void sendEmotion(String emotionName) {
+        String key = mWilddogRef.push().getKey();
+        ChatMessage chat = new ChatMessage(emotionName, user.getName(), key);
+//            Log.d("WQ_ChatFragment", key);
+        mWilddogRef.child(key).setValue(chat);
+        inputText.setText("");
+    }
 
     @Nullable
     @Override
@@ -134,8 +173,18 @@ public class ChatFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.chat_top_fragment, container, false);
         final RecyclerView messageRecyclerView = (RecyclerView) view.findViewById(R.id.message_recycler_view);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        final MessageAdapter messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(50));
+        messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(50));
         messageRecyclerView.setAdapter(messageAdapter);
+
+        Button sendEmotion = (Button)view.findViewById(R.id.function_button);
+
+        sendEmotion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 点击，跳出表情包部分
+                mCallbacks.onEmotionSelected();
+            }
+        });
 
 
         // Setup our view and list adapter. Ensure it scrolls to the bottom as data changes
