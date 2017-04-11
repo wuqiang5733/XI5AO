@@ -32,6 +32,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.xuxiaoxiao.xiao.base.BaseFragment;
 import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
+import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
 
 import java.util.ArrayList;
@@ -205,8 +206,10 @@ public class ChatFragment extends BaseFragment {
                 // 点击，跳出表情包部分
                 hideKeyboard(view);
                 inputText.clearFocus();
+                // RecyclerView 接到最底
                 messageAdapter.notifyDataSetChanged();
-                mCallbacks.onFunctionPanelSelected();
+//                mCallbacks.onFunctionPanelSelected();
+                EventBus.getDefault().post(new ToggleFunctionPanel());
             }
         });
 

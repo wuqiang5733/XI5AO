@@ -4,6 +4,10 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
+
 public class ChatActivity extends UniversalFragmentActivity implements ChatFragment.Callbacks,FunctionPageView.Callbacks{
 
 //    private FrameLayout frameLayout;
@@ -46,5 +50,43 @@ public class ChatActivity extends UniversalFragmentActivity implements ChatFragm
         ChatFragment listFragment = (ChatFragment)getSupportFragmentManager().
                 findFragmentById(R.id.top_fragment_container);
         listFragment.sendEmotion(emotionName);
+    }
+
+    @Subscribe
+    public void onMessageEvent(ToggleFunctionPanel event) {
+
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.bottom_fragment_container);
+        frameLayout.setVisibility((frameLayout.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
+
+
+        if (findViewById(R.id.bottom_fragment_container) == null) {
+            return;
+        } else {
+            // 如果是平板，那么把 CrimeFragment 嵌到 detail_fragment_container 当中
+//            ViewPager pager = (ViewPager)findViewById(R.id.emotion_pager);
+//            pager.setAdapter(new PageViewAdapter(this, getFragmentManager());
+
+            Fragment emotionPageView = FunctionPageView.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.bottom_fragment_container, emotionPageView)
+                    .commit();
+        }
+    }
+
+    /**
+     * greenrobot/EventBus
+     * 好像就是那里需要接收，那里就得 注册 与 取消 一下
+     * 发送发 只需要 Post 一下就发了
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }
