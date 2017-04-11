@@ -31,6 +31,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.xuxiaoxiao.xiao.base.BaseFragment;
+import org.xuxiaoxiao.xiao.infrastructure.EBHiddFuncPanel;
 import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
 import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
@@ -62,34 +63,37 @@ public class ChatFragment extends BaseFragment {
     // 一个实现 Callbacks 的对象，
     // 将来会 在 onAttach 方法当中 把 Activity 转换成 Callbacks
     // 并赋给这个变量
-    private Callbacks mCallbacks;
     private MessageAdapter messageAdapter;
     private RecyclerView messageRecyclerView;
 
 
     /**
      * Required interface for hosting activities.
-     */
-    public interface Callbacks {
-        // 接口定义了需要 Activity 做的事情
-        // 只要一个 Activity实现了这个接口
-        // Fragment 就有了可以调用 Activity 当中 函数的办法
-//        void onCrimeSelected(Crime crime);
-        void onFunctionPanelSelected();
-        void hideFunctionPanel();
-    }
+     *
+     *     private Callbacks mCallbacks;
 
-    @Override
-    // 注意传进来的是 Context
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mCallbacks = (Callbacks) context;
-    }
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mCallbacks = null;
-    }
+     *     public interface Callbacks {
+     // 接口定义了需要 Activity 做的事情
+     // 只要一个 Activity实现了这个接口
+     // Fragment 就有了可以调用 Activity 当中 函数的办法
+     //        void onCrimeSelected(Crime crime);
+     void onFunctionPanelSelected();
+     void hideFunctionPanel();
+     }
+
+     @Override
+     // 注意传进来的是 Context
+     public void onAttach(Context context) {
+     super.onAttach(context);
+     mCallbacks = (Callbacks) context;
+     }
+     @Override
+     public void onDetach() {
+     super.onDetach();
+     mCallbacks = null;
+     }
+     */
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -206,7 +210,7 @@ public class ChatFragment extends BaseFragment {
                 // 点击，跳出表情包部分
                 hideKeyboard(view);
                 inputText.clearFocus();
-                // RecyclerView 接到最底
+                // RecyclerView 拉到最底
                 messageAdapter.notifyDataSetChanged();
 //                mCallbacks.onFunctionPanelSelected();
                 EventBus.getDefault().post(new ToggleFunctionPanel());
@@ -254,7 +258,8 @@ public class ChatFragment extends BaseFragment {
                 if (hasFocus) {
                     // 此处为得到焦点时的处理内容
 //                    mHiddenView.setVisibility(View.GONE);
-                    mCallbacks.hideFunctionPanel();
+//                    mCallbacks.hideFunctionPanel();
+                    EventBus.getDefault().post(new EBHiddFuncPanel());
                     messageAdapter.notifyDataSetChanged();
 
                 } else {

@@ -1,6 +1,5 @@
 package org.xuxiaoxiao.xiao;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -36,7 +35,7 @@ public class FunctionPageView extends BaseFragment {
         super.onDestroy();
         Log.d("WQ","onDestroy");
     }
-
+/*
     static private Callbacks callbacks;
 
     public interface Callbacks {
@@ -56,7 +55,7 @@ public class FunctionPageView extends BaseFragment {
 //        callbacks = null;
         Log.d("WQ","onDetach");
     }
-
+*/
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

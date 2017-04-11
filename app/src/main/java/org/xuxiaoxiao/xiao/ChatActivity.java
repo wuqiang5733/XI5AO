@@ -6,9 +6,10 @@ import android.widget.FrameLayout;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.xuxiaoxiao.xiao.infrastructure.EBHiddFuncPanel;
 import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 
-public class ChatActivity extends UniversalFragmentActivity implements ChatFragment.Callbacks,FunctionPageView.Callbacks{
+public class ChatActivity extends UniversalFragmentActivity{
 
 //    private FrameLayout frameLayout;
 
@@ -16,7 +17,7 @@ public class ChatActivity extends UniversalFragmentActivity implements ChatFragm
     protected Fragment createFragment() {
         return new ChatFragment();
     }
-
+/*
     @Override
     public void onFunctionPanelSelected() {
 
@@ -51,7 +52,7 @@ public class ChatActivity extends UniversalFragmentActivity implements ChatFragm
                 findFragmentById(R.id.top_fragment_container);
         listFragment.sendEmotion(emotionName);
     }
-
+*/
     @Subscribe
     public void onMessageEvent(ToggleFunctionPanel event) {
 
@@ -71,6 +72,12 @@ public class ChatActivity extends UniversalFragmentActivity implements ChatFragm
                     .replace(R.id.bottom_fragment_container, emotionPageView)
                     .commit();
         }
+    }
+    @Subscribe
+    public void HiddenFunctionPanel(EBHiddFuncPanel event){
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.bottom_fragment_container);
+
+        frameLayout.setVisibility(View.GONE);
     }
 
     /**
