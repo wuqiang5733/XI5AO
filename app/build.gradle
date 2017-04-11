@@ -56,4 +56,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.wilddog.client:wilddog-sync-android:2.2.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }

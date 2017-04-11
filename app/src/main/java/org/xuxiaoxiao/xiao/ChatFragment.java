@@ -27,7 +27,11 @@ import com.wilddog.client.SyncReference;
 import com.wilddog.client.ValueEventListener;
 import com.wilddog.client.WilddogSync;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.xuxiaoxiao.xiao.base.BaseFragment;
+import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
 
 import java.util.ArrayList;
@@ -112,7 +116,7 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
-
+        EventBus.getDefault().register(this);
         // Finally, a little indication of connection status
         mConnectedListener = mWilddogRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
@@ -135,6 +139,7 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onStop() {
         super.onStop();
+        EventBus.getDefault().unregister(this);
         mWilddogRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
         // 不要 messageAdapter.cleanup(); 程序 就不会Crash 不知道为什么
 //        messageAdapter.cleanup();
@@ -169,6 +174,10 @@ public class ChatFragment extends BaseFragment {
 //            Log.d("WQ_ChatFragment", key);
         mWilddogRef.child(key).setValue(chat);
         inputText.setText("");
+    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(SendEmotion event) {
+        inputText.setText(event.getEmotionName());
     }
     public void showKeyboard(View v) {
         InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

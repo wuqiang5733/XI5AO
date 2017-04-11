@@ -17,10 +17,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
 import org.xuxiaoxiao.xiao.base.BaseFragment;
 import org.xuxiaoxiao.xiao.infrastructure.Emotion;
 import org.xuxiaoxiao.xiao.infrastructure.EmotionLab;
 import org.xuxiaoxiao.xiao.infrastructure.EmotionSeries;
+import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
 
 import java.util.ArrayList;
 
@@ -160,7 +162,8 @@ public class FunctionPageView extends BaseFragment {
             public void onClick(View v) {
 //                Toast.makeText(getActivity(), emotionn.getDescription(), Toast.LENGTH_SHORT).show();
 //                Log.d("WQ", emotionn.getDescription());
-                callbacks.onSendEmotion(emotionn.getDescription());
+//                callbacks.onSendEmotion(emotionn.getDescription());
+                EventBus.getDefault().post(new SendEmotion(emotionn.getDescription()));
             }
 
         }

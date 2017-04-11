@@ -28,4 +28,5 @@ public class BaseFragment extends Fragment {
         // Setup our Wilddog mWilddogRef
 //        mWilddogRef = WilddogSync.getInstance().getReference().child("chat");
     }
+
 }
