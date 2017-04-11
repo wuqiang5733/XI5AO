@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,7 +58,7 @@ public class ChatFragment extends BaseFragment {
     private String mUsername;
     private SyncReference mWilddogRef;
     private ValueEventListener mConnectedListener;
-//    private MessageAdapter mChatListAdapter;
+    //    private MessageAdapter mChatListAdapter;
     private EditText inputText;
 
     // 一个实现 Callbacks 的对象，
@@ -66,32 +67,32 @@ public class ChatFragment extends BaseFragment {
     private MessageAdapter messageAdapter;
     private RecyclerView messageRecyclerView;
 
+    public static final int MEDIA_TYPE_TEXT = 0;
+    public static final int MEDIA_TYPE_PHOTO = 1;
 
     /**
      * Required interface for hosting activities.
+     * <p>
+     * private Callbacks mCallbacks;
+     * <p>
+     * public interface Callbacks {
+     * // 接口定义了需要 Activity 做的事情
+     * // 只要一个 Activity实现了这个接口
+     * // Fragment 就有了可以调用 Activity 当中 函数的办法
+     * //        void onCrimeSelected(Crime crime);
+     * void onFunctionPanelSelected();
+     * void hideFunctionPanel();
+     * }
      *
-     *     private Callbacks mCallbacks;
-
-     *     public interface Callbacks {
-     // 接口定义了需要 Activity 做的事情
-     // 只要一个 Activity实现了这个接口
-     // Fragment 就有了可以调用 Activity 当中 函数的办法
-     //        void onCrimeSelected(Crime crime);
-     void onFunctionPanelSelected();
-     void hideFunctionPanel();
-     }
-
-     @Override
-     // 注意传进来的是 Context
-     public void onAttach(Context context) {
-     super.onAttach(context);
-     mCallbacks = (Callbacks) context;
-     }
-     @Override
-     public void onDetach() {
-     super.onDetach();
-     mCallbacks = null;
-     }
+     * @Override // 注意传进来的是 Context
+     * public void onAttach(Context context) {
+     * super.onAttach(context);
+     * mCallbacks = (Callbacks) context;
+     * }
+     * @Override public void onDetach() {
+     * super.onDetach();
+     * mCallbacks = null;
+     * }
      */
 
 
@@ -167,23 +168,31 @@ public class ChatFragment extends BaseFragment {
             // Create our 'model', a Chat object
             // Create a new, auto-generated child of that chat location, and save our chat data there
             String key = mWilddogRef.push().getKey();
-            ChatMessage chat = new ChatMessage(input, user.getName(), key);
+            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0);
 //            Log.d("WQ_ChatFragment", key);
             mWilddogRef.child(key).setValue(chat);
             inputText.setText("");
         }
     }
+    /*
     public void sendEmotion(String emotionName) {
         String key = mWilddogRef.push().getKey();
-        ChatMessage chat = new ChatMessage(emotionName, user.getName(), key);
+        ChatMessage chat = new ChatMessage(emotionName, user.getName(), key,1);
 //            Log.d("WQ_ChatFragment", key);
         mWilddogRef.child(key).setValue(chat);
         inputText.setText("");
     }
+    */
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(SendEmotion event) {
-        inputText.setText(event.getEmotionName());
+        String key = mWilddogRef.push().getKey();
+        ChatMessage chat = new ChatMessage(event.getEmotionName(), user.getName(), key, 1);
+//            Log.d("WQ_ChatFragment", key);
+        mWilddogRef.child(key).setValue(chat);
+        inputText.setText("");
     }
+
     public void showKeyboard(View v) {
         InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.showSoftInput(inputText, InputMethodManager.SHOW_IMPLICIT);
@@ -193,6 +202,7 @@ public class ChatFragment extends BaseFragment {
         InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(inputText.getWindowToken(), 0);
     }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -202,7 +212,7 @@ public class ChatFragment extends BaseFragment {
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI();
 
-        Button sendEmotion = (Button)view.findViewById(R.id.function_button);
+        Button sendEmotion = (Button) view.findViewById(R.id.function_button);
 
         sendEmotion.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,6 +281,7 @@ public class ChatFragment extends BaseFragment {
 
         return view;
     }
+
     public void updateUI() {
         // 这个方法是在 onResume 方法当中调用的，
         // 也就是让整个 View 在页面重新呈现的时候
@@ -415,15 +426,37 @@ public class ChatFragment extends BaseFragment {
         }
 
         @Override
+        public int getItemViewType(int position) {
+            return mModels.get(position).getMediaType();
+        }
+
+        @Override
         public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = getActivity().getLayoutInflater().inflate(R.layout.chat_message, parent, false);
-            return new MessageViewHolder(view);
-//            return null;
+            switch (viewType) {
+                case 0: {
+                    View view = getActivity().getLayoutInflater().inflate(R.layout.media_type_text, parent, false);
+                    return new TextMessageViewHolder(view);
+                }
+
+                case 1: {
+                    View view = getActivity().getLayoutInflater().inflate(R.layout.media_type_photo, parent, false);
+                    return new PhotoMessageViewHolder(view);
+                }
+                default:
+                    break;
+            }
+            return null;
         }
 
         @Override
         public void onBindViewHolder(MessageViewHolder holder, int position) {
-            holder.bind(mModels.get(position));
+            if (holder.getItemViewType() == 0) {
+                TextMessageViewHolder textViewHolder = (TextMessageViewHolder) holder;
+                textViewHolder.bind(mModels.get(position));
+            } else {
+                PhotoMessageViewHolder textViewHolder = (PhotoMessageViewHolder) holder;
+                textViewHolder.bind(mModels.get(position));
+            }
         }
 
         @Override
@@ -432,7 +465,20 @@ public class ChatFragment extends BaseFragment {
         }
     }
 
-    private class MessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private abstract class MessageViewHolder extends RecyclerView.ViewHolder {
+//        private TextView msgID;
+//        private LinearLayout layout;
+//        private ChatMessage mChatMessage;
+
+        public MessageViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public abstract void bind(ChatMessage chatMessage);
+
+    }
+
+    private class TextMessageViewHolder extends MessageViewHolder {
         private TextView msg;
 
         private TextView msgID;
@@ -441,7 +487,8 @@ public class ChatFragment extends BaseFragment {
 
         private ChatMessage mChatMessage;
 
-        public MessageViewHolder(View itemView) {
+
+        public TextMessageViewHolder(View itemView) {
             super(itemView);
             msg = (TextView) itemView.findViewById(R.id.msg);
 
@@ -449,7 +496,7 @@ public class ChatFragment extends BaseFragment {
 
             layout = (LinearLayout) itemView.findViewById(R.id.layout);
 
-            itemView.setOnClickListener(this);
+//            itemView.setOnClickListener(this);
         }
 
         public void bind(ChatMessage chatMessage) {
@@ -470,10 +517,61 @@ public class ChatFragment extends BaseFragment {
             }
             layout.setLayoutParams(params);
         }
+    }
 
-        @Override
-        public void onClick(View v) {
+    private class PhotoMessageViewHolder extends MessageViewHolder {
+        private ImageView imageView;
+        private TextView msgID;
 
+        private LinearLayout layout;
+
+        private ChatMessage mChatMessage;
+
+        public PhotoMessageViewHolder(View itemView) {
+            super(itemView);
+
+//            msgID = (TextView) itemView.findViewById(R.id.msgid);
+
+            layout = (LinearLayout) itemView.findViewById(R.id.layout);
+            imageView = (ImageView) itemView.findViewById(R.id.imageView);
+        }
+
+        public void bind(ChatMessage chatMessage) {
+            mChatMessage = chatMessage;
+            boolean isMine = mChatMessage.getAuthor() != null && mChatMessage.getAuthor().equals(user.getName());
+
+//            msg.setText(mChatMessage.getMessage());
+            // 显示 ID
+//            msgID.setText(mChatMessage.getMessageID());
+
+            layout.setBackgroundResource(isMine ? R.drawable.message_right : R.drawable.message_left);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+
+            if (!isMine) {
+                params.gravity = Gravity.LEFT;
+            } else {
+                params.gravity = Gravity.RIGHT;
+            }
+            layout.setLayoutParams(params);
         }
     }
 }
+
+/**
+ * mChatMessage = chatMessage;
+ * boolean isMine = mChatMessage.getAuthor() != null && mChatMessage.getAuthor().equals(user.getName());
+ * <p>
+ * msgID.setText(String.valueOf(chatMessage.getMessageID()));
+ * <p>
+ * layout.setBackgroundResource(isMine ? R.drawable.message_right : R.drawable.message_left);
+ * LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+ * LinearLayout.LayoutParams.WRAP_CONTENT);
+ * <p>
+ * if (!isMine) {
+ * params.gravity = Gravity.LEFT;
+ * } else {
+ * params.gravity = Gravity.RIGHT;
+ * }
+ * layout.setLayoutParams(params);
+ */

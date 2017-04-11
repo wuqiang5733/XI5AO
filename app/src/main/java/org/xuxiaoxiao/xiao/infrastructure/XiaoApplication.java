@@ -16,7 +16,7 @@ public class XiaoApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        WilddogOptions wilddogOptions = new WilddogOptions.Builder().setSyncUrl("https://wuxu1314.wilddogio.com").build();
+        WilddogOptions wilddogOptions = new WilddogOptions.Builder().setSyncUrl("https://xuxiaoxiao1314.wilddogio.com").build();
         wilddogApp = WilddogApp.initializeApp(this, wilddogOptions);
         user = new User("6789");
         soundPool = new SoundPool(this);
