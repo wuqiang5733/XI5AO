@@ -3,13 +3,14 @@ package org.xuxiaoxiao.xiao;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.xuxiaoxiao.xiao.infrastructure.EBHiddFuncPanel;
 import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 
-public class ChatActivity extends UniversalFragmentActivity{
+public class ChatActivity extends UniversalFragmentActivity implements FunctionPageView.Contract{
 
 //    private FrameLayout frameLayout;
 
@@ -95,5 +96,10 @@ public class ChatActivity extends UniversalFragmentActivity{
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onEmotionClick(String emotionName) {
+        Toast.makeText(this,emotionName,Toast.LENGTH_SHORT).show();
     }
 }

@@ -305,28 +305,14 @@ public class ChatFragment extends BaseFragment {
 
     private class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
 
-        ///////////
         private Query mRef;
-        //        private Class<ChatMessage> mModelClass;
         private List<ChatMessage> mModels;
         private List<String> mKeys;
         private ChildEventListener mListener;
-//    private OkHttpClient okHttpClient;
-        ////////////////////////////////
 
-//        private Activity activity;
-
-//        private User user;
-//        private SoundPool soundPool;
-//        private XiaoApplication application;
 
         public MessageAdapter(Query mRef) {
-
-//            this.activity = activity;
-//            this.application = application;
             this.mRef = mRef;
-//            this.soundPool = application.getSoundPool();
-//            this.user = application.getUser();
 
             mModels = new ArrayList<>();
             mKeys = new ArrayList<String>();
