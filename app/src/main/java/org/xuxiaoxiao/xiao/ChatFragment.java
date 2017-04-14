@@ -1,6 +1,7 @@
 package org.xuxiaoxiao.xiao;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
 import com.wilddog.client.ChildEventListener;
 import com.wilddog.client.DataSnapshot;
 import com.wilddog.client.Query;
@@ -33,6 +35,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.xuxiaoxiao.xiao.base.BaseFragment;
 import org.xuxiaoxiao.xiao.infrastructure.EBHiddFuncPanel;
+import org.xuxiaoxiao.xiao.infrastructure.Internet;
 import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
 import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
@@ -108,6 +111,7 @@ public class ChatFragment extends BaseFragment {
 
         // Setup our Wilddog mWilddogRef
         mWilddogRef = WilddogSync.getInstance().getReference().child("chat");
+        new DownloadTask().execute();
 
     }
 
@@ -168,7 +172,7 @@ public class ChatFragment extends BaseFragment {
             // Create our 'model', a Chat object
             // Create a new, auto-generated child of that chat location, and save our chat data there
             String key = mWilddogRef.push().getKey();
-            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0);
+            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0,"T");
 //            Log.d("WQ_ChatFragment", key);
             mWilddogRef.child(key).setValue(chat);
             inputText.setText("");
@@ -187,7 +191,7 @@ public class ChatFragment extends BaseFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(SendEmotion event) {
         String key = mWilddogRef.push().getKey();
-        ChatMessage chat = new ChatMessage(event.getEmotionName(), user.getName(), key, 1);
+        ChatMessage chat = new ChatMessage(event.getEmotionName(), user.getName(), key, 1,"");
 //            Log.d("WQ_ChatFragment", key);
         mWilddogRef.child(key).setValue(chat);
         inputText.setText("");
@@ -526,6 +530,12 @@ public class ChatFragment extends BaseFragment {
             mChatMessage = chatMessage;
             boolean isMine = mChatMessage.getAuthor() != null && mChatMessage.getAuthor().equals(user.getName());
 
+            Picasso.with(getActivity()).load("http://services.hanselandpetal.com/photos/camellia.jpg")
+//            Picasso.with(getActivity()).load("http://omnxgkkjc.bkt.clouddn.com/IMG_0763.JPG")
+                    .fit().centerCrop()
+                    .placeholder(R.drawable.imgdemo)
+                    .error(R.drawable.imgdemo).into(imageView);
+
 //            msg.setText(mChatMessage.getMessage());
             // 显示 ID
 //            msgID.setText(mChatMessage.getMessageID());
@@ -541,6 +551,20 @@ public class ChatFragment extends BaseFragment {
             }
             layout.setLayoutParams(params);
         }
+    }
+
+    private class DownloadTask extends AsyncTask<Void,Void,Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            new Internet().fetchItems();
+            return null;
+        }
+//
+//        @Override
+//        protected void onPostExecute(List<GalleryItem> items) {
+//            mItems = items;
+//            setupAdapter();
+//        }
     }
 }
 

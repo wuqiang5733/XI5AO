@@ -16,17 +16,19 @@ public class ChatMessage {
     private String author;
     private String messageID;
     private int mediaType;
+    private String ImgUrl;
 
     // Required default constructor for Wilddog object mapping
     @SuppressWarnings("unused")
     private ChatMessage() {
     }
 
-    public ChatMessage(String message, String author, String messageID, int mediaType) {
+    public ChatMessage(String message, String author, String messageID, int mediaType, String imgUrl) {
         this.message = message;
         this.author = author;
         this.messageID = messageID;
         this.mediaType = mediaType;
+        ImgUrl = imgUrl;
     }
 
     public String getMessage() {
@@ -59,5 +61,13 @@ public class ChatMessage {
 
     public void setMediaType(int mediaType) {
         this.mediaType = mediaType;
+    }
+
+    public String getImgUrl() {
+        return ImgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        ImgUrl = imgUrl;
     }
 }
