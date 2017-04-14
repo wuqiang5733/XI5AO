@@ -1,11 +1,13 @@
 package org.xuxiaoxiao.xiao;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -40,6 +42,7 @@ import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
 import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,6 +118,8 @@ public class ChatFragment extends BaseFragment {
         new PutBmob().execute();
 //        new PutBmob().execute();
 
+//        InputStream in = getActivity().getApplicationContext().getResources().openRawResource(R.drawable.imgdemo);
+
     }
 
     @Override
@@ -174,7 +179,7 @@ public class ChatFragment extends BaseFragment {
             // Create our 'model', a Chat object
             // Create a new, auto-generated child of that chat location, and save our chat data there
             String key = mWilddogRef.push().getKey();
-            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0,"T");
+            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0, "T");
 //            Log.d("WQ_ChatFragment", key);
             mWilddogRef.child(key).setValue(chat);
             inputText.setText("");
@@ -193,7 +198,7 @@ public class ChatFragment extends BaseFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(SendEmotion event) {
         String key = mWilddogRef.push().getKey();
-        ChatMessage chat = new ChatMessage(event.getEmotionName(), user.getName(), key, 1,"");
+        ChatMessage chat = new ChatMessage(event.getEmotionName(), user.getName(), key, 1, "");
 //            Log.d("WQ_ChatFragment", key);
         mWilddogRef.child(key).setValue(chat);
         inputText.setText("");
@@ -555,7 +560,7 @@ public class ChatFragment extends BaseFragment {
         }
     }
 
-    private class DownloadTask extends AsyncTask<Void,Void,Void> {
+    private class DownloadTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             new Internet().fetchItems();
@@ -569,10 +574,10 @@ public class ChatFragment extends BaseFragment {
 //        }
     }
 
-    private class PutBmob extends AsyncTask<Void,Void,Void> {
+    private class PutBmob extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            new Internet().BmobPostFile("xiaoxiao","text");
+            new Internet().BmobPostPhoto(getResources().getDrawable(R.drawable.imgdemo), "photo");
             return null;
         }
 //
@@ -581,6 +586,26 @@ public class ChatFragment extends BaseFragment {
 //            mItems = items;
 //            setupAdapter();
 //        }
+    }
+
+    private class UploadImage extends AsyncTask<Void, Void, Void> {
+        Bitmap image;
+        String name;
+
+        public UploadImage(Bitmap image, String name) {
+            this.image = image;
+            this.name = name;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            // Hold the bite representation of the image
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+            // Have a String representation of the image
+            String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(),Base64.DEFAULT);
+            return null;
+        }
     }
 }
 
