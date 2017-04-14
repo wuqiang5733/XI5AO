@@ -113,6 +113,7 @@ public class ChatFragment extends BaseFragment {
         mWilddogRef = WilddogSync.getInstance().getReference().child("chat");
 //        new DownloadTask().execute();
         new PutBmob().execute();
+//        new PutBmob().execute();
 
     }
 
@@ -571,7 +572,7 @@ public class ChatFragment extends BaseFragment {
     private class PutBmob extends AsyncTask<Void,Void,Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            new Internet().httpUrlConnPost("xiaoxiao","text");
+            new Internet().BmobPostFile("xiaoxiao","text");
             return null;
         }
 //
