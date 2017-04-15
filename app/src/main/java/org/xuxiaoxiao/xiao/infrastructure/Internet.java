@@ -163,15 +163,15 @@ public class Internet {
                 boolean result = rjson.getBoolean("json");//从rjson对象中得到key值为"json"的数据，这里服务端返回的是一个boolean类型的数据
                 if (result) {//判断结果是否正确
 //                    mHandler.sendEmptyMessage(USERLOGIN_SUCCESS);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_SUCCESS");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_SUCCESS");
                 } else {
 //                    mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
                 }
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
             }
         } catch (IOException ioe) {
@@ -257,15 +257,15 @@ public class Internet {
                 boolean result = rjson.getBoolean("json");//从rjson对象中得到key值为"json"的数据，这里服务端返回的是一个boolean类型的数据
                 if (result) {//判断结果是否正确
 //                    mHandler.sendEmptyMessage(USERLOGIN_SUCCESS);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_SUCCESS");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_SUCCESS");
                 } else {
 //                    mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
                 }
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
             }
         } catch (IOException ioe) {
@@ -352,15 +352,15 @@ public class Internet {
                 boolean result = rjson.getBoolean("json");//从rjson对象中得到key值为"json"的数据，这里服务端返回的是一个boolean类型的数据
                 if (result) {//判断结果是否正确
 //                    mHandler.sendEmptyMessage(USERLOGIN_SUCCESS);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_SUCCESS");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_SUCCESS");
                 } else {
 //                    mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
                 }
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
             }
         } catch (IOException ioe) {
@@ -381,13 +381,13 @@ public class Internet {
         Bitmap image = drawableToBitmap(drawable);
         // Hold the bite representation of the image
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+        image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         // Have a String representation of the image
-        String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(),Base64.DEFAULT);
+        String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
 
         URL url = null;
         try {
-            url = new URL(" https://api.bmob.cn/2/files/text.png");
+            url = new URL(" https://api.bmob.cn/2/files/bbda.png");
             urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
             urlConnection.setConnectTimeout(3000);//连接的超时时间
             urlConnection.setUseCaches(false);//不使用缓存
@@ -416,7 +416,7 @@ public class Internet {
             BufferedOutputStream bos = new BufferedOutputStream(out);//缓冲字节流包装字节流
             byte[] bytes = byteArrayOutputStream.toByteArray();//把字符串转化为字节数组
             bos.write(bytes);//把这个字节数组的数据写入缓冲区中
-            bos.flush();//刷新缓冲区，发送数据
+            bos.flush();//刷新缓冲区，发送数据，这个是必须的在关闭Stream之前
             out.close();
             bos.close();
 
@@ -461,21 +461,22 @@ public class Internet {
                 }
                 in.close();
                 br.close();
+                Log.d("WQWQ",buffer.toString());
                 JSONObject rjson = new JSONObject(buffer.toString());
 
                 Log.d(TAG, "rjson=" + rjson);//rjson={"json":true}
                 boolean result = rjson.getBoolean("json");//从rjson对象中得到key值为"json"的数据，这里服务端返回的是一个boolean类型的数据
                 if (result) {//判断结果是否正确
 //                    mHandler.sendEmptyMessage(USERLOGIN_SUCCESS);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_SUCCESS");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_SUCCESS");
                 } else {
 //                    mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                    Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
                 }
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                Log.e(TAG, "Failed to fetch items"+"USERLOGIN_FAILED");
+                Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
 
             }
         } catch (IOException ioe) {
@@ -489,7 +490,8 @@ public class Internet {
         // 下面是变流的方法
 //        InputStream in=context.getResources().openRawResource(图片id);
     }
-    public static Bitmap drawableToBitmap(Drawable drawable){
+
+    public static Bitmap drawableToBitmap(Drawable drawable) {
 
         int width = drawable.getIntrinsicWidth();
 
@@ -503,12 +505,11 @@ public class Internet {
 
         Canvas canvas = new Canvas(bitmap);
 
-        drawable.setBounds(0,0,width,height);
+        drawable.setBounds(0, 0, width, height);
 
         drawable.draw(canvas);
 
         return bitmap;
-
 
 
     }
