@@ -464,6 +464,8 @@ public class Internet {
                 in.close();
                 br.close();
                 Log.d("WQWQ", buffer.toString());
+                JSONObject json = new JSONObject(buffer.toString());
+                Log.d("WQWQ",json.getString("url"));
 
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
@@ -473,6 +475,8 @@ public class Internet {
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items", ioe);
 //            mHandler.sendEmptyMessage(USERLOGIN_FAILED);
+        } catch (JSONException e) {
+            e.printStackTrace();
         } finally {
             urlConnection.disconnect();//使用完关闭TCP连接，释放资源
         }
