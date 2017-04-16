@@ -655,18 +655,13 @@ public class ChatFragment extends BaseFragment {
         @Override
         protected void onPostExecute(String s) {
 //            super.onPostExecute(s);
+            Toast.makeText(getActivity(),"发送成功",Toast.LENGTH_SHORT).show();
             String key = mWilddogRef.push().getKey();
             ChatMessage chat = new ChatMessage("", user.getName(), key, 1, s);
 //            Log.d("WQ_ChatFragment", key);
             mWilddogRef.child(key).setValue(chat);
             inputText.setText("");
         }
-        //
-//        @Override
-//        protected void onPostExecute(List<GalleryItem> items) {
-//            mItems = items;
-//            setupAdapter();
-//        }
     }
 
     private class UploadImage extends AsyncTask<Void, Void, Void> {

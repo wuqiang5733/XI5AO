@@ -28,7 +28,7 @@ public class ChatMessage {
         this.author = author;
         this.messageID = messageID;
         this.mediaType = mediaType;
-        ImgUrl = imgUrl;
+        this.ImgUrl = imgUrl;
     }
 
     public String getMessage() {
