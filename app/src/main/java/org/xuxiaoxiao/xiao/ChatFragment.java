@@ -615,13 +615,22 @@ public class ChatFragment extends BaseFragment {
                 Toast.makeText(getActivity(),String.valueOf(mGlobalChatMessage.getMediaType()),Toast.LENGTH_SHORT).show();
                 //return super.onContextItemSelected(item);
                 return true;
+            case 5:
+                Toast.makeText(getActivity(),"这是图片",Toast.LENGTH_SHORT).show();
+                //return super.onContextItemSelected(item);
+                return true;
+            case 6:
+                new PutBmob(phothBitmap, "test3").execute();
+                Toast.makeText(getActivity(),"重新发送",Toast.LENGTH_SHORT).show();
+                //return super.onContextItemSelected(item);
+                return true;
             default:
                 Toast.makeText(getActivity(),"Nothing",Toast.LENGTH_SHORT).show();
                 //return super.onContextItemSelected(item);
                 return false;
         }
     }
-    private class PhotoMessageViewHolder extends MessageViewHolder implements View.OnClickListener{
+    private class PhotoMessageViewHolder extends MessageViewHolder implements View.OnCreateContextMenuListener{
         private ImageView imageView;
         private TextView msgID;
 
@@ -636,7 +645,9 @@ public class ChatFragment extends BaseFragment {
 
             layout = (LinearLayout) itemView.findViewById(R.id.layout);
             imageView = (ImageView) itemView.findViewById(R.id.imageView);
-            itemView.setOnClickListener(this);
+//            itemView.setOnClickListener(this);
+            itemView.setOnCreateContextMenuListener(this);
+
         }
 
         public void bind(ChatMessage chatMessage) {
@@ -664,11 +675,22 @@ public class ChatFragment extends BaseFragment {
             }
             layout.setLayoutParams(params);
         }
-
         @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(),mChatMessage.getMessage(),Toast.LENGTH_SHORT).show();
+        public void onCreateContextMenu(ContextMenu menu, View v,
+                                        ContextMenu.ContextMenuInfo menuInfo) {
+            // 如果发送失败，这儿就加上一个重新发送的选项
+            mGlobalChatMessage = mChatMessage;
+            menu.setHeaderTitle("Select The Action");
+            menu.add(0, 5, 0, "Photo");//groupId, itemId, order, title
+            menu.add(0, 6, 0, "重新发送");
+            menu.add(0, 7, 0, "ID");
+            menu.add(0, 8, 0, "Type");
         }
+
+//        @Override
+//        public void onClick(View v) {
+//            Toast.makeText(getActivity(),mChatMessage.getMessage(),Toast.LENGTH_SHORT).show();
+//        }
     }
 
     private class DownloadTask extends AsyncTask<Void, Void, Void> {
