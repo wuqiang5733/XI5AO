@@ -375,7 +375,8 @@ public class Internet {
     }
 
 
-    public void BmobPostPhoto(Bitmap image, String name) {
+    public String  BmobPostPhoto(Bitmap image, String name) {
+        String photoUrl = "";
         HttpURLConnection urlConnection = null;
 //        Bitmap image = drawableToBitmap(drawable);
         // Hold the bite representation of the image
@@ -466,6 +467,7 @@ public class Internet {
                 Log.d("WQWQ", buffer.toString());
                 JSONObject json = new JSONObject(buffer.toString());
                 Log.d("WQWQ",json.getString("url"));
+                photoUrl = json.getString("url");
 
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
@@ -482,6 +484,7 @@ public class Internet {
         }
         // 下面是变流的方法
 //        InputStream in=context.getResources().openRawResource(图片id);
+        return photoUrl;
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {

@@ -600,7 +600,7 @@ public class ChatFragment extends BaseFragment {
             mChatMessage = chatMessage;
             boolean isMine = mChatMessage.getAuthor() != null && mChatMessage.getAuthor().equals(user.getName());
 
-            Picasso.with(getActivity()).load("http://services.hanselandpetal.com/photos/camellia.jpg")
+            Picasso.with(getActivity()).load(mChatMessage.getImgUrl())
 //            Picasso.with(getActivity()).load("http://omnxgkkjc.bkt.clouddn.com/IMG_0763.JPG")
                     .fit().centerCrop()
                     .placeholder(R.drawable.imgdemo)
@@ -637,7 +637,7 @@ public class ChatFragment extends BaseFragment {
 //        }
     }
 
-    private class PutBmob extends AsyncTask<Void, Void, Void> {
+    private class PutBmob extends AsyncTask<Void, Void, String> {
         Bitmap image;
         String name;
 
@@ -647,11 +647,21 @@ public class ChatFragment extends BaseFragment {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            new Internet().BmobPostPhoto(image,name);
-            return null;
+        protected String doInBackground(Void... params) {
+
+            return new Internet().BmobPostPhoto(image,name);
         }
-//
+
+        @Override
+        protected void onPostExecute(String s) {
+//            super.onPostExecute(s);
+            String key = mWilddogRef.push().getKey();
+            ChatMessage chat = new ChatMessage("", user.getName(), key, 1, s);
+//            Log.d("WQ_ChatFragment", key);
+            mWilddogRef.child(key).setValue(chat);
+            inputText.setText("");
+        }
+        //
 //        @Override
 //        protected void onPostExecute(List<GalleryItem> items) {
 //            mItems = items;
