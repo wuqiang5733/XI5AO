@@ -90,6 +90,7 @@ public class ChatFragment extends BaseFragment {
     public static final int MEDIA_TYPE_PHOTO = 1;
 
     private static final int RESULT_LOAD_IMAGE = 9002;
+    private Bitmap phothBitmap;
 
     /**
      * Required interface for hosting activities.
@@ -599,17 +600,17 @@ public class ChatFragment extends BaseFragment {
         public void bind(ChatMessage chatMessage) {
             mChatMessage = chatMessage;
             boolean isMine = mChatMessage.getAuthor() != null && mChatMessage.getAuthor().equals(user.getName());
-
-            Picasso.with(getActivity()).load(mChatMessage.getImgUrl())
-//            Picasso.with(getActivity()).load("http://omnxgkkjc.bkt.clouddn.com/IMG_0763.JPG")
-                    .fit().centerCrop()
-                    .placeholder(R.drawable.imgdemo)
-                    .error(R.drawable.imgdemo).into(imageView);
-
-//            msg.setText(mChatMessage.getMessage());
-            // 显示 ID
-//            msgID.setText(mChatMessage.getMessageID());
-
+            if (mChatMessage.getImgUrl() == ""){
+//                Toast.makeText(getActivity(),"发送失败",Toast.LENGTH_SHORT).show();
+                // 发送失败之后，如果用户决定再发送一次，那应该取得这个消息的ID，
+                // 然后把这条消息删除掉，然后再发送一次
+                imageView.setImageResource(android.R.drawable.stat_notify_error);
+            }else {
+                Picasso.with(getActivity()).load(mChatMessage.getImgUrl())
+                        .fit().centerCrop()
+                        .placeholder(R.drawable.imgdemo)
+                        .error(R.drawable.imgdemo).into(imageView);
+            }
             layout.setBackgroundResource(isMine ? R.drawable.message_right : R.drawable.message_left);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -629,12 +630,6 @@ public class ChatFragment extends BaseFragment {
             new Internet().fetchItems();
             return null;
         }
-//
-//        @Override
-//        protected void onPostExecute(List<GalleryItem> items) {
-//            mItems = items;
-//            setupAdapter();
-//        }
     }
 
     private class PutBmob extends AsyncTask<Void, Void, String> {
@@ -655,7 +650,7 @@ public class ChatFragment extends BaseFragment {
         @Override
         protected void onPostExecute(String s) {
 //            super.onPostExecute(s);
-            Toast.makeText(getActivity(),"发送成功",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getActivity(),"发送成功",Toast.LENGTH_SHORT).show();
             String key = mWilddogRef.push().getKey();
             ChatMessage chat = new ChatMessage("", user.getName(), key, 1, s);
 //            Log.d("WQ_ChatFragment", key);
@@ -690,12 +685,13 @@ public class ChatFragment extends BaseFragment {
 
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null){
             Uri selectedImage = data.getData();
+            phothBitmap = null;
 //            imageToUplaod.setImageURI(null);
 //            imageToUplaod.setImageURI(selectedImage);
 //            bSelectImage.setText("Change Image");
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
-                new PutBmob(bitmap,"test3").execute();
+                phothBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
+                new PutBmob(phothBitmap,"test3").execute();
 
             } catch (IOException e) {
                 e.printStackTrace();

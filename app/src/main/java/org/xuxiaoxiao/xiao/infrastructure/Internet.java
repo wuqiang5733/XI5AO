@@ -382,7 +382,7 @@ public class Internet {
         // Hold the bite representation of the image
         // 直接二进制的 Stream 就可以发送，不需要转换成字符串
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
+        image.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
         // Have a String representation of the image
 //        String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
 
