@@ -14,6 +14,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -209,6 +210,7 @@ public class ChatFragment extends BaseFragment {
 
         }
     }
+
     private void sendMessage() {
         String input = inputText.getText().toString();
         if (!input.equals("")) {
@@ -539,7 +541,7 @@ public class ChatFragment extends BaseFragment {
 
     }
 
-    private class TextMessageViewHolder extends MessageViewHolder {
+    private class TextMessageViewHolder extends MessageViewHolder implements View.OnCreateContextMenuListener{
         private TextView msg;
 
         private TextView msgID;
@@ -556,7 +558,7 @@ public class ChatFragment extends BaseFragment {
             msgID = (TextView) itemView.findViewById(R.id.msgid);
 
             layout = (LinearLayout) itemView.findViewById(R.id.layout);
-
+            itemView.setOnCreateContextMenuListener(this);
 //            itemView.setOnClickListener(this);
         }
 
@@ -578,9 +580,18 @@ public class ChatFragment extends BaseFragment {
             }
             layout.setLayoutParams(params);
         }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v,
+                                        ContextMenu.ContextMenuInfo menuInfo) {
+            menu.setHeaderTitle("Select The Action");
+            menu.add(0, v.getId(), 0, mChatMessage.getMessageID());//groupId, itemId, order, title
+            menu.add(0, v.getId(), 0, "删除");
+            menu.add(0, v.getId(), 0, "复制");
+        }
     }
 
-    private class PhotoMessageViewHolder extends MessageViewHolder {
+    private class PhotoMessageViewHolder extends MessageViewHolder implements View.OnClickListener{
         private ImageView imageView;
         private TextView msgID;
 
@@ -595,17 +606,18 @@ public class ChatFragment extends BaseFragment {
 
             layout = (LinearLayout) itemView.findViewById(R.id.layout);
             imageView = (ImageView) itemView.findViewById(R.id.imageView);
+            itemView.setOnClickListener(this);
         }
 
         public void bind(ChatMessage chatMessage) {
             mChatMessage = chatMessage;
             boolean isMine = mChatMessage.getAuthor() != null && mChatMessage.getAuthor().equals(user.getName());
-            if (mChatMessage.getImgUrl() == ""){
+            if (mChatMessage.getImgUrl() == "") {
 //                Toast.makeText(getActivity(),"发送失败",Toast.LENGTH_SHORT).show();
                 // 发送失败之后，如果用户决定再发送一次，那应该取得这个消息的ID，
                 // 然后把这条消息删除掉，然后再发送一次
                 imageView.setImageResource(android.R.drawable.stat_notify_error);
-            }else {
+            } else {
                 Picasso.with(getActivity()).load(mChatMessage.getImgUrl())
                         .fit().centerCrop()
                         .placeholder(R.drawable.imgdemo)
@@ -621,6 +633,11 @@ public class ChatFragment extends BaseFragment {
                 params.gravity = Gravity.RIGHT;
             }
             layout.setLayoutParams(params);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(getActivity(),mChatMessage.getMessage(),Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -644,7 +661,7 @@ public class ChatFragment extends BaseFragment {
         @Override
         protected String doInBackground(Void... params) {
 
-            return new Internet().BmobPostPhoto(image,name);
+            return new Internet().BmobPostPhoto(image, name);
         }
 
         @Override
@@ -683,7 +700,7 @@ public class ChatFragment extends BaseFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null){
+        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
             phothBitmap = null;
 //            imageToUplaod.setImageURI(null);
@@ -691,7 +708,7 @@ public class ChatFragment extends BaseFragment {
 //            bSelectImage.setText("Change Image");
             try {
                 phothBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
-                new PutBmob(phothBitmap,"test3").execute();
+                new PutBmob(phothBitmap, "test3").execute();
 
             } catch (IOException e) {
                 e.printStackTrace();
