@@ -1,23 +1,32 @@
 package org.xuxiaoxiao.xiao;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,6 +45,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.xuxiaoxiao.xiao.base.BaseFragment;
+import org.xuxiaoxiao.xiao.chatconfig.ChatConfigActivity;
 import org.xuxiaoxiao.xiao.infrastructure.EBHiddFuncPanel;
 import org.xuxiaoxiao.xiao.infrastructure.Internet;
 import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
@@ -43,8 +53,11 @@ import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
 
 //import android.media.SoundPool;
 
@@ -75,6 +88,8 @@ public class ChatFragment extends BaseFragment {
 
     public static final int MEDIA_TYPE_TEXT = 0;
     public static final int MEDIA_TYPE_PHOTO = 1;
+
+    private static final int RESULT_LOAD_IMAGE = 9002;
 
     /**
      * Required interface for hosting activities.
@@ -115,10 +130,11 @@ public class ChatFragment extends BaseFragment {
         // Setup our Wilddog mWilddogRef
         mWilddogRef = WilddogSync.getInstance().getReference().child("chat");
 //        new DownloadTask().execute();
-        new PutBmob().execute();
+//        new PutBmob().execute();
 //        new PutBmob().execute();
 
 //        InputStream in = getActivity().getApplicationContext().getResources().openRawResource(R.drawable.imgdemo);
+        setHasOptionsMenu(true);
 
     }
 
@@ -173,6 +189,25 @@ public class ChatFragment extends BaseFragment {
 //        }
 //    }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.chat_conf, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // 转到配置页面
+            case R.id.chat_config:
+//                Toast.makeText(getActivity(),"dddd",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), ChatConfigActivity.class);
+                startActivity(intent);
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
     private void sendMessage() {
         String input = inputText.getText().toString();
         if (!input.equals("")) {
@@ -224,6 +259,14 @@ public class ChatFragment extends BaseFragment {
         updateUI();
 
         Button sendEmotion = (Button) view.findViewById(R.id.function_button);
+        ImageButton imgButton = (ImageButton) view.findViewById(R.id.img_button);
+        imgButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+            }
+        });
 
         sendEmotion.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -263,6 +306,25 @@ public class ChatFragment extends BaseFragment {
                 return true;
             }
         });
+        inputText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                int textSum = s.toString().length();
+                if (textSum < 1) {
+
+                }
+            }
+        });
 
         view.findViewById(R.id.send_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -281,6 +343,7 @@ public class ChatFragment extends BaseFragment {
 //                    mHiddenView.setVisibility(View.GONE);
 //                    mCallbacks.hideFunctionPanel();
                     EventBus.getDefault().post(new EBHiddFuncPanel());
+                    // 把 RecyclerView 当中的信息拉到最低
                     messageAdapter.notifyDataSetChanged();
 
                 } else {
@@ -575,9 +638,17 @@ public class ChatFragment extends BaseFragment {
     }
 
     private class PutBmob extends AsyncTask<Void, Void, Void> {
+        Bitmap image;
+        String name;
+
+        public PutBmob(Bitmap image, String name) {
+            this.image = image;
+            this.name = name;
+        }
+
         @Override
         protected Void doInBackground(Void... params) {
-            new Internet().BmobPostPhoto(getResources().getDrawable(R.drawable.imgdemo), "photo");
+            new Internet().BmobPostPhoto(image,name);
             return null;
         }
 //
@@ -601,10 +672,29 @@ public class ChatFragment extends BaseFragment {
         protected Void doInBackground(Void... params) {
             // Hold the bite representation of the image
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+            image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
             // Have a String representation of the image
-            String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(),Base64.DEFAULT);
+            String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
             return null;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null){
+            Uri selectedImage = data.getData();
+//            imageToUplaod.setImageURI(null);
+//            imageToUplaod.setImageURI(selectedImage);
+//            bSelectImage.setText("Change Image");
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
+                new PutBmob(bitmap,"test3").execute();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

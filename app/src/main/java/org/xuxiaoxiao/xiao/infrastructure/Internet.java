@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -376,14 +375,15 @@ public class Internet {
     }
 
 
-    public void BmobPostPhoto(Drawable drawable, String name) {
+    public void BmobPostPhoto(Bitmap image, String name) {
         HttpURLConnection urlConnection = null;
-        Bitmap image = drawableToBitmap(drawable);
+//        Bitmap image = drawableToBitmap(drawable);
         // Hold the bite representation of the image
+        // 直接二进制的 Stream 就可以发送，不需要转换成字符串
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         // Have a String representation of the image
-        String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+//        String encodeImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
 
         URL url = null;
         try {
@@ -414,8 +414,10 @@ public class Internet {
             //-------------使用字节流发送数据--------------
             OutputStream out = urlConnection.getOutputStream();
             BufferedOutputStream bos = new BufferedOutputStream(out);//缓冲字节流包装字节流
-            byte[] bytes = byteArrayOutputStream.toByteArray();//把字符串转化为字节数组
-            bos.write(bytes);//把这个字节数组的数据写入缓冲区中
+//            byte[] bytes = byteArrayOutputStream.toByteArray();//把字符串转化为字节数组
+
+            bos.write(byteArrayOutputStream.toByteArray());//把这个字节数组的数据写入缓冲区中
+//            bos.write(bytes);//把这个字节数组的数据写入缓冲区中
             bos.flush();//刷新缓冲区，发送数据，这个是必须的在关闭Stream之前
             out.close();
             bos.close();
@@ -461,19 +463,8 @@ public class Internet {
                 }
                 in.close();
                 br.close();
-                Log.d("WQWQ",buffer.toString());
-                JSONObject rjson = new JSONObject(buffer.toString());
+                Log.d("WQWQ", buffer.toString());
 
-                Log.d(TAG, "rjson=" + rjson);//rjson={"json":true}
-                boolean result = rjson.getBoolean("json");//从rjson对象中得到key值为"json"的数据，这里服务端返回的是一个boolean类型的数据
-                if (result) {//判断结果是否正确
-//                    mHandler.sendEmptyMessage(USERLOGIN_SUCCESS);
-                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_SUCCESS");
-                } else {
-//                    mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-                    Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
-
-                }
             } else {
 //                mHandler.sendEmptyMessage(USERLOGIN_FAILED);
                 Log.e(TAG, "Failed to fetch items" + "USERLOGIN_FAILED");
@@ -482,8 +473,6 @@ public class Internet {
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items", ioe);
 //            mHandler.sendEmptyMessage(USERLOGIN_FAILED);
-        } catch (JSONException e) {
-            e.printStackTrace();
         } finally {
             urlConnection.disconnect();//使用完关闭TCP连接，释放资源
         }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">XIAO</string>
+    <string name="config">Configuration</string>
 </resources>
