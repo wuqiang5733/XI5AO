@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -92,6 +93,7 @@ public class ChatFragment extends BaseFragment {
 
     private static final int RESULT_LOAD_IMAGE = 9002;
     private Bitmap phothBitmap;
+    private ChatMessage mGlobalChatMessage;
 
     /**
      * Required interface for hosting activities.
@@ -584,13 +586,41 @@ public class ChatFragment extends BaseFragment {
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v,
                                         ContextMenu.ContextMenuInfo menuInfo) {
+            mGlobalChatMessage = mChatMessage;
             menu.setHeaderTitle("Select The Action");
-            menu.add(0, v.getId(), 0, mChatMessage.getMessageID());//groupId, itemId, order, title
-            menu.add(0, v.getId(), 0, "删除");
-            menu.add(0, v.getId(), 0, "复制");
+            menu.add(0, 1, 0, "Message");//groupId, itemId, order, title
+            menu.add(0, 2, 0, "Author");
+            menu.add(0, 3, 0, "ID");
+            menu.add(0, 4, 0, "Type");
         }
     }
-
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView .AdapterContextMenuInfo) item.getMenuInfo();
+        ContextMenu.ContextMenuInfo ddd = item.getMenuInfo();
+        switch (item.getItemId()) {
+            case 1:
+                Toast.makeText(getActivity(),mGlobalChatMessage.getMessage(),Toast.LENGTH_SHORT).show();
+                //editNote(info.id);
+                return true;
+            case 2:
+                Toast.makeText(getActivity(),mGlobalChatMessage.getAuthor(),Toast.LENGTH_SHORT).show();
+                //shareNote(info.id);
+                return true;
+            case 3:
+                Toast.makeText(getActivity(),mGlobalChatMessage.getMessageID(),Toast.LENGTH_SHORT).show();
+                //deleteNote(info.id);
+                return true;
+            case 4:
+                Toast.makeText(getActivity(),String.valueOf(mGlobalChatMessage.getMediaType()),Toast.LENGTH_SHORT).show();
+                //return super.onContextItemSelected(item);
+                return true;
+            default:
+                Toast.makeText(getActivity(),"Nothing",Toast.LENGTH_SHORT).show();
+                //return super.onContextItemSelected(item);
+                return false;
+        }
+    }
     private class PhotoMessageViewHolder extends MessageViewHolder implements View.OnClickListener{
         private ImageView imageView;
         private TextView msgID;
