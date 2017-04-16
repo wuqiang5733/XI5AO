@@ -394,7 +394,7 @@ public class Internet {
             urlConnection.setUseCaches(false);//不使用缓存
             //urlConnection.setFollowRedirects(false);是static函数，作用于所有的URLConnection对象。
             urlConnection.setInstanceFollowRedirects(true);//是成员函数，仅作用于当前函数,设置这个连接是否可以被重定向
-            urlConnection.setReadTimeout(3000);//响应的超时时间
+            urlConnection.setReadTimeout(5000);//响应的超时时间
             urlConnection.setDoInput(true);//设置这个连接是否可以写入数据
             urlConnection.setDoOutput(true);//设置这个连接是否可以输出数据
 //            urlConnection.setRequestMethod("POST");//设置请求的方式
