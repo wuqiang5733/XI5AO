@@ -599,7 +599,7 @@ public class ChatFragment extends BaseFragment {
             mGlobalChatMessage = mChatMessage;
             menu.setHeaderTitle("Select The Action");
             menu.add(0, 1, 0, "Message");//groupId, itemId, order, title
-            menu.add(0, 2, 0, "Author");
+            menu.add(0, 2, 0, "删除消息");
             menu.add(0, 3, 0, "更改");
             menu.add(0, 4, 0, "复制");
         }
@@ -616,11 +616,12 @@ public class ChatFragment extends BaseFragment {
                 //editNote(info.id);
                 return true;
             case 2:
-                Toast.makeText(getActivity(), mGlobalChatMessage.getAuthor(), Toast.LENGTH_SHORT).show();
+                mWilddogRef.child(mGlobalChatMessage.getMessageID()).removeValue();
+//                Toast.makeText(getActivity(), mGlobalChatMessage.getAuthor(), Toast.LENGTH_SHORT).show();
                 //shareNote(info.id);
                 return true;
             case 3:
-                Toast.makeText(getActivity(), mGlobalChatMessage.getMessageID(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), mGlobalChatMessage.getMessageID(), Toast.LENGTH_SHORT).show();
                 HashMap<String, Object> user = new HashMap<>();
                 user.put("message", "Tim Cook");
                 mWilddogRef.child(mGlobalChatMessage.getMessageID()).updateChildren(user);
