@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -25,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -90,9 +90,11 @@ public class ChatFragment extends BaseFragment {
 
     public static final int MEDIA_TYPE_TEXT = 0;
     public static final int MEDIA_TYPE_PHOTO = 1;
-
+    // 图库当中选择图片时使用的一个 ResultCode
     private static final int RESULT_LOAD_IMAGE = 9002;
+    // 下面这个 Bitmap 是图片在发送失败之后，再次发送使用的
     private Bitmap phothBitmap;
+    // 全局性的一个信息，在 ContextMenu 菜单当中使用
     private ChatMessage mGlobalChatMessage;
 
     /**
@@ -543,7 +545,7 @@ public class ChatFragment extends BaseFragment {
 
     }
 
-    private class TextMessageViewHolder extends MessageViewHolder implements View.OnCreateContextMenuListener{
+    private class TextMessageViewHolder extends MessageViewHolder implements View.OnCreateContextMenuListener {
         private TextView msg;
 
         private TextView msgID;
@@ -586,51 +588,67 @@ public class ChatFragment extends BaseFragment {
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v,
                                         ContextMenu.ContextMenuInfo menuInfo) {
+            // 把 Message 赋给一个全局变量，这样可以在右键菜单当中使用
             mGlobalChatMessage = mChatMessage;
             menu.setHeaderTitle("Select The Action");
             menu.add(0, 1, 0, "Message");//groupId, itemId, order, title
             menu.add(0, 2, 0, "Author");
             menu.add(0, 3, 0, "ID");
-            menu.add(0, 4, 0, "Type");
+            menu.add(0, 4, 0, "复制");
         }
     }
+
+    // 右键菜单
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView .AdapterContextMenuInfo) item.getMenuInfo();
-        ContextMenu.ContextMenuInfo ddd = item.getMenuInfo();
+//        AdapterView.AdapterContextMenuInfo info = (AdapterView .AdapterContextMenuInfo) item.getMenuInfo();
+//        ContextMenu.ContextMenuInfo ddd = item.getMenuInfo();
         switch (item.getItemId()) {
             case 1:
-                Toast.makeText(getActivity(),mGlobalChatMessage.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), mGlobalChatMessage.getMessage(), Toast.LENGTH_SHORT).show();
                 //editNote(info.id);
                 return true;
             case 2:
-                Toast.makeText(getActivity(),mGlobalChatMessage.getAuthor(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), mGlobalChatMessage.getAuthor(), Toast.LENGTH_SHORT).show();
                 //shareNote(info.id);
                 return true;
             case 3:
-                Toast.makeText(getActivity(),mGlobalChatMessage.getMessageID(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), mGlobalChatMessage.getMessageID(), Toast.LENGTH_SHORT).show();
                 //deleteNote(info.id);
                 return true;
             case 4:
-                Toast.makeText(getActivity(),String.valueOf(mGlobalChatMessage.getMediaType()),Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(),String.valueOf(mGlobalChatMessage.getMediaType()),Toast.LENGTH_SHORT).show();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    final android.content.ClipboardManager clipboardManager = (android.content.ClipboardManager) getActivity()
+                            .getSystemService(Context.CLIPBOARD_SERVICE);
+                    final android.content.ClipData clipData = android.content.ClipData
+                            .newPlainText("text label", mGlobalChatMessage.getMessage());
+                    clipboardManager.setPrimaryClip(clipData);
+                } else {
+                    @SuppressWarnings("deprecation")
+                    final android.text.ClipboardManager clipboardManager = (android.text.ClipboardManager) getActivity()
+                            .getSystemService(Context.CLIPBOARD_SERVICE);
+                    clipboardManager.setText(mGlobalChatMessage.getMessage());
+                }
                 //return super.onContextItemSelected(item);
                 return true;
             case 5:
-                Toast.makeText(getActivity(),"这是图片",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "这是图片", Toast.LENGTH_SHORT).show();
                 //return super.onContextItemSelected(item);
                 return true;
             case 6:
                 new PutBmob(phothBitmap, "test3").execute();
-                Toast.makeText(getActivity(),"重新发送",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "重新发送", Toast.LENGTH_SHORT).show();
                 //return super.onContextItemSelected(item);
                 return true;
             default:
-                Toast.makeText(getActivity(),"Nothing",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Nothing", Toast.LENGTH_SHORT).show();
                 //return super.onContextItemSelected(item);
                 return false;
         }
     }
-    private class PhotoMessageViewHolder extends MessageViewHolder implements View.OnCreateContextMenuListener{
+
+    private class PhotoMessageViewHolder extends MessageViewHolder implements View.OnCreateContextMenuListener {
         private ImageView imageView;
         private TextView msgID;
 
@@ -675,6 +693,7 @@ public class ChatFragment extends BaseFragment {
             }
             layout.setLayoutParams(params);
         }
+
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v,
                                         ContextMenu.ContextMenuInfo menuInfo) {
@@ -751,7 +770,7 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        // 在图库当中选择图片
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
             phothBitmap = null;
