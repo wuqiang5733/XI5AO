@@ -159,6 +159,7 @@ public class ChatFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+//        messageAdapter.setup();
         // Finally, a little indication of connection status
         mConnectedListener = mWilddogRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
@@ -380,7 +381,9 @@ public class ChatFragment extends BaseFragment {
 //        List<Crime> crimes = crimeLab.getCrimes();
 
         if (messageAdapter == null) {
-            messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(20));
+//            mWilddogRef.orderByKey().endAt("-KhwMNoo8b8dLA7BGOHd").limitToLast(20)
+            messageAdapter = new MessageAdapter(mWilddogRef.orderByKey().endAt("-KhwMNoo8b8dLA7BGOHd").limitToLast(20));
+//            messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(20));
             messageRecyclerView.setAdapter(messageAdapter);
         } else {
 //            mAdapter.setCrimes(crimes);
@@ -405,24 +408,33 @@ public class ChatFragment extends BaseFragment {
             mModels = new ArrayList<>();
             mKeys = new ArrayList<String>();
             // Look for all child events. We will then map them to our own internal ArrayList, which backs ListView
+            // 注意事件类型，在这儿是 ChildEventListener
+            // 注意下边是定义了一个事件类型，可以像变量一样使用
             mListener = this.mRef.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-
+                    // Calling val() / getValue() on a snapshot returns the JavaScript object representation of the data.
+                    // If no data exists at the reference's location, the snapshots value will be null.
                     ChatMessage model = (ChatMessage) dataSnapshot.getValue(ChatMessage.class);
                     String key = dataSnapshot.getKey();
 
                     // Insert into the correct location, based on previousChildName
+                    // 如果这是第一条消息
                     if (previousChildName == null) {
                         mModels.add(0, model);
                         mKeys.add(0, key);
                     } else {
+                        // 从 key 数组当中 获得上一个消息的 key 的 索引
                         int previousIndex = mKeys.indexOf(previousChildName);
+//                        Toast.makeText(getActivity(),String.valueOf(previousIndex),Toast.LENGTH_SHORT).show();
+                        // 把这个索引加 1
                         int nextIndex = previousIndex + 1;
+                        // 如果数组（消息数组，比如我们设置的是20条消息）已经满了，那就直接 append 到最后
                         if (nextIndex == mModels.size()) {
                             mModels.add(model);
                             mKeys.add(key);
                         } else {
+                            // 这是消息还没有满的情况
                             mModels.add(nextIndex, model);
                             mKeys.add(nextIndex, key);
                         }
@@ -498,9 +510,16 @@ public class ChatFragment extends BaseFragment {
             mModels.clear();
             mKeys.clear();
         }
+        public void setup() {
+            // We're being destroyed, let go of our mListener and forget about all of the mModels
+            mRef.addChildEventListener(mListener);
+            mModels.clear();
+            mKeys.clear();
+        }
 
         @Override
         public int getItemViewType(int position) {
+            // 可以在这儿根据 position 知道是不是自己的消息，如果是自己的消息，以后就不 CreateViewHolder 了
             return mModels.get(position).getMediaType();
         }
 
@@ -524,6 +543,23 @@ public class ChatFragment extends BaseFragment {
 
         @Override
         public void onBindViewHolder(MessageViewHolder holder, int position) {
+//            Toast.makeText(getActivity(),String.valueOf(position),Toast.LENGTH_SHORT).show();
+            if (position == 3){
+                // 如果RecyclerView已经快拉到最上面了，也就是快没有消息了
+                // 获取位置上的消息ID
+                String messageID = mModels.get(position).getMessageID();
+                mWilddogRef.orderByKey().endAt(messageID).limitToLast(20);
+                // 再往上拉20条消息出来
+                // 在拉之前必须先以chat为基础 order 一下
+//                Query queryRef =  mWilddogRef.child(messageID);
+//                mWilddogRef.orderByKey().startAt(messageID).limitToLast(20);
+//                mWilddogRef.orderByKey();
+//                mWilddogRef.limitToLast(20).startAt(messageID);
+//                notifyDataSetChanged();
+//                mModels.clear();
+//                mKeys.clear();
+            }
+            // 如果是文本类型的消息的话
             if (holder.getItemViewType() == 0) {
                 TextMessageViewHolder textViewHolder = (TextMessageViewHolder) holder;
                 textViewHolder.bind(mModels.get(position));
