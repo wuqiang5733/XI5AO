@@ -57,6 +57,7 @@ import org.xuxiaoxiao.xiao.model.ChatMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -599,7 +600,7 @@ public class ChatFragment extends BaseFragment {
             menu.setHeaderTitle("Select The Action");
             menu.add(0, 1, 0, "Message");//groupId, itemId, order, title
             menu.add(0, 2, 0, "Author");
-            menu.add(0, 3, 0, "ID");
+            menu.add(0, 3, 0, "更改");
             menu.add(0, 4, 0, "复制");
         }
     }
@@ -620,6 +621,9 @@ public class ChatFragment extends BaseFragment {
                 return true;
             case 3:
                 Toast.makeText(getActivity(), mGlobalChatMessage.getMessageID(), Toast.LENGTH_SHORT).show();
+                HashMap<String, Object> user = new HashMap<>();
+                user.put("message", "Tim Cook");
+                mWilddogRef.child(mGlobalChatMessage.getMessageID()).updateChildren(user);
                 //deleteNote(info.id);
                 return true;
             case 4:
