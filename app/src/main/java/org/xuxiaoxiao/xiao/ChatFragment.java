@@ -96,6 +96,8 @@ public class ChatFragment extends BaseFragment {
     private Bitmap phothBitmap;
     // 全局性的一个信息，在 ContextMenu 菜单当中使用
     private ChatMessage mGlobalChatMessage;
+    private ImageButton sendTextButton;
+    private ImageButton imgSelectButton;
 
     /**
      * Required interface for hosting activities.
@@ -266,8 +268,8 @@ public class ChatFragment extends BaseFragment {
         updateUI();
 
         Button sendEmotion = (Button) view.findViewById(R.id.function_button);
-        ImageButton imgButton = (ImageButton) view.findViewById(R.id.img_button);
-        imgButton.setOnClickListener(new View.OnClickListener() {
+        imgSelectButton = (ImageButton) view.findViewById(R.id.img_button);
+        imgSelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -327,13 +329,17 @@ public class ChatFragment extends BaseFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 int textSum = s.toString().length();
-                if (textSum < 1) {
-
+                if (textSum != 0) {
+                    sendTextButton.setVisibility(View.VISIBLE);
+                    imgSelectButton.setVisibility(View.GONE);
+                }else {
+                    sendTextButton.setVisibility(View.GONE);
+                    imgSelectButton.setVisibility(View.VISIBLE);
                 }
             }
         });
-
-        view.findViewById(R.id.send_button).setOnClickListener(new View.OnClickListener() {
+        sendTextButton = (ImageButton)view.findViewById(R.id.send_text_button);
+        sendTextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sendMessage();
