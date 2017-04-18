@@ -69,7 +69,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
-import static android.provider.Telephony.Mms.Part.FILENAME;
 
 //import android.media.SoundPool;
 
@@ -159,11 +158,15 @@ public class ChatFragment extends BaseFragment {
         setHasOptionsMenu(true);
 
         if (Build.VERSION.SDK_INT >= 19) {
-            fileToEdit = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),FILENAME);
+            // 目录 加 文件名 可以创建一个 File
+            // https://developer.android.com/training/basics/data-storage/files.html
+            fileToEdit = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),"xiao.txt");
         }else{
-            fileToEdit = new File(Environment.getExternalStorageDirectory() + "/Documents",FILENAME);
+            fileToEdit = new File(Environment.getExternalStorageDirectory() + "/Documents","xiao.txt");
         }
-
+        if(!fileToEdit.exists())
+            fileToEdit.getParentFile().mkdirs();
+        // fileToEdit.getParentFile().mkdirs()
     }
 
     @Override
@@ -252,16 +255,19 @@ public class ChatFragment extends BaseFragment {
         if (!input.equals("")) {
             // Create our 'model', a Chat object
             // Create a new, auto-generated child of that chat location, and save our chat data there
-//            String key = mWilddogRef.push().getKey();
-            // 下面是自定义 key
-            mWilddogRef.push().setValue("Test1");
-            ChatMessage chat = new ChatMessage(input, user.getName(), "Test", 0, "T");
-//            Log.d("WQ_ChatFragment", key);
-//            mWilddogRef.child(key).setValue(chat);
-            mWilddogRef.child("Test1").setValue(chat);
+            String key = mWilddogRef.push().getKey();
+            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0, "T");
+            mWilddogRef.child(key).setValue(chat);
             inputText.setText("");
         }
     }
+
+    /**
+     *  mWilddogRef.push().setValue("Test1"); 
+     *  ChatMessage chat = new ChatMessage(input, user.getName(), “这是消息内容”, 0, "T"); 
+     *  mWilddogRef.child("Test1").setValue(chat);
+     * @param event
+     */
     /*
     public void sendEmotion(String emotionName) {
         String key = mWilddogRef.push().getKey();
@@ -894,7 +900,7 @@ public class ChatFragment extends BaseFragment {
             }
         }
     }
-
+//    return new Internet().BmobPostPhoto(image, name);
     private class LoadTextTask extends AsyncTask<File, Void, String> {
         @Override
         protected String doInBackground(File... files) {
@@ -948,14 +954,14 @@ public class ChatFragment extends BaseFragment {
         @Override
         public void run() {
             try {
-                fileToEdit.getParentFile().mkdirs();
-
-                FileOutputStream fos = new FileOutputStream(fileToEdit);
+//                fileToEdit.getParentFile().mkdirs();
+                // 加上 true 就是追加内容
+                FileOutputStream fos = new FileOutputStream(fileToEdit,true);
 
                 Writer w = new BufferedWriter(new OutputStreamWriter(fos));
 
                 try {
-                    w.write(text);
+                    w.write(text + "\n");
                     w.flush();
                     fos.getFD().sync();
                 } finally {
