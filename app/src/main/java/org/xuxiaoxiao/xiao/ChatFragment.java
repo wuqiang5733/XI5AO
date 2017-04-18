@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -54,13 +55,21 @@ import org.xuxiaoxiao.xiao.infrastructure.SendEmotion;
 import org.xuxiaoxiao.xiao.infrastructure.ToggleFunctionPanel;
 import org.xuxiaoxiao.xiao.model.ChatMessage;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static android.provider.Telephony.Mms.Part.FILENAME;
 
 //import android.media.SoundPool;
 
@@ -99,6 +108,10 @@ public class ChatFragment extends BaseFragment {
     private ChatMessage mGlobalChatMessage;
     private ImageButton sendTextButton;
     private ImageButton imgSelectButton;
+    // 下面是与把聊天记录保存到手机上有关的
+    private File fileToEdit;
+    private LoadTextTask loadTask = null;
+    private boolean loaded = false;
 
     /**
      * Required interface for hosting activities.
@@ -145,6 +158,12 @@ public class ChatFragment extends BaseFragment {
 //        InputStream in = getActivity().getApplicationContext().getResources().openRawResource(R.drawable.imgdemo);
         setHasOptionsMenu(true);
 
+        if (Build.VERSION.SDK_INT >= 19) {
+            fileToEdit = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),FILENAME);
+        }else{
+            fileToEdit = new File(Environment.getExternalStorageDirectory() + "/Documents",FILENAME);
+        }
+
     }
 
     @Override
@@ -188,6 +207,15 @@ public class ChatFragment extends BaseFragment {
 //        messageAdapter.cleanup();
     }
 
+    @Override
+    public void onDestroy() {
+        if (loadTask != null) {
+            loadTask.cancel(false);
+        }
+
+        super.onDestroy();
+    }
+
 //    private void setupUsername() {
 //        SharedPreferences prefs = getApplication().getSharedPreferences("ChatPrefs", 0);
 //        mUsername = prefs.getString("username", null);
@@ -224,10 +252,13 @@ public class ChatFragment extends BaseFragment {
         if (!input.equals("")) {
             // Create our 'model', a Chat object
             // Create a new, auto-generated child of that chat location, and save our chat data there
-            String key = mWilddogRef.push().getKey();
-            ChatMessage chat = new ChatMessage(input, user.getName(), key, 0, "T");
+//            String key = mWilddogRef.push().getKey();
+            // 下面是自定义 key
+            mWilddogRef.push().setValue("Test1");
+            ChatMessage chat = new ChatMessage(input, user.getName(), "Test", 0, "T");
 //            Log.d("WQ_ChatFragment", key);
-            mWilddogRef.child(key).setValue(chat);
+//            mWilddogRef.child(key).setValue(chat);
+            mWilddogRef.child("Test1").setValue(chat);
             inputText.setText("");
         }
     }
@@ -259,7 +290,17 @@ public class ChatFragment extends BaseFragment {
         InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(inputText.getWindowToken(), 0);
     }
-
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // 这儿是因为有三个文件吗？要用线程池
+        if (!loaded) {
+            // 在创建 View 的时候，如果还没有 load 那就把三个文件载入
+            loadTask = new LoadTextTask();
+            loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                    (File)fileToEdit);
+        }
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -268,6 +309,12 @@ public class ChatFragment extends BaseFragment {
         messageRecyclerView = (RecyclerView) view.findViewById(R.id.message_recycler_view);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI();
+
+//        if (!loaded) {
+//            // 在创建 View 的时候，如果还没有 load 那就把三个文件载入
+//            loadTask = new LoadTextTask();
+//            loadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(File)fileToEdit);
+//        }
 
         Button sendEmotion = (Button) view.findViewById(R.id.function_button);
         imgSelectButton = (ImageButton) view.findViewById(R.id.img_button);
@@ -334,13 +381,13 @@ public class ChatFragment extends BaseFragment {
                 if (textSum != 0) {
                     sendTextButton.setVisibility(View.VISIBLE);
                     imgSelectButton.setVisibility(View.GONE);
-                }else {
+                } else {
                     sendTextButton.setVisibility(View.GONE);
                     imgSelectButton.setVisibility(View.VISIBLE);
                 }
             }
         });
-        sendTextButton = (ImageButton)view.findViewById(R.id.send_text_button);
+        sendTextButton = (ImageButton) view.findViewById(R.id.send_text_button);
         sendTextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -382,8 +429,9 @@ public class ChatFragment extends BaseFragment {
 
         if (messageAdapter == null) {
 //            mWilddogRef.orderByKey().endAt("-KhwMNoo8b8dLA7BGOHd").limitToLast(20)
-            messageAdapter = new MessageAdapter(mWilddogRef.orderByKey().endAt("-KhwMNoo8b8dLA7BGOHd").limitToLast(20));
-//            messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(20));
+            // 下面这一句是可行的，成功了
+//            messageAdapter = new MessageAdapter(mWilddogRef.orderByKey().endAt("-KhwMNoo8b8dLA7BGOHd").limitToLast(20));
+            messageAdapter = new MessageAdapter(mWilddogRef.limitToLast(20));
             messageRecyclerView.setAdapter(messageAdapter);
         } else {
 //            mAdapter.setCrimes(crimes);
@@ -417,7 +465,7 @@ public class ChatFragment extends BaseFragment {
                     // If no data exists at the reference's location, the snapshots value will be null.
                     ChatMessage model = (ChatMessage) dataSnapshot.getValue(ChatMessage.class);
                     String key = dataSnapshot.getKey();
-
+                    Log.d("WQWQ", String.valueOf(key));
                     // Insert into the correct location, based on previousChildName
                     // 如果这是第一条消息
                     if (previousChildName == null) {
@@ -510,6 +558,7 @@ public class ChatFragment extends BaseFragment {
             mModels.clear();
             mKeys.clear();
         }
+
         public void setup() {
             // We're being destroyed, let go of our mListener and forget about all of the mModels
             mRef.addChildEventListener(mListener);
@@ -544,21 +593,32 @@ public class ChatFragment extends BaseFragment {
         @Override
         public void onBindViewHolder(MessageViewHolder holder, int position) {
 //            Toast.makeText(getActivity(),String.valueOf(position),Toast.LENGTH_SHORT).show();
-            if (position == 3){
-                // 如果RecyclerView已经快拉到最上面了，也就是快没有消息了
-                // 获取位置上的消息ID
-                String messageID = mModels.get(position).getMessageID();
-                mWilddogRef.orderByKey().endAt(messageID).limitToLast(20);
-                // 再往上拉20条消息出来
-                // 在拉之前必须先以chat为基础 order 一下
-//                Query queryRef =  mWilddogRef.child(messageID);
-//                mWilddogRef.orderByKey().startAt(messageID).limitToLast(20);
-//                mWilddogRef.orderByKey();
-//                mWilddogRef.limitToLast(20).startAt(messageID);
-//                notifyDataSetChanged();
-//                mModels.clear();
-//                mKeys.clear();
-            }
+//            if (position == 3){
+//                // 如果RecyclerView已经快拉到最上面了，也就是快没有消息了
+//                // 获取位置上的消息ID
+////                String messageID = mModels.get(position).getMessageID();
+//////                mRef.removeEventListener(mListener);
+////                mRef.orderByKey();
+////                mRef.endAt(messageID).limitToLast(20);
+////                mRef.addChildEventListener(mListener);
+//
+////                new MessageAdapter(mWilddogRef.orderByKey().endAt(messageID).limitToLast(20));
+//                // 再往上拉20条消息出来
+//                // 在拉之前必须先以chat为基础 order 一下
+////                Query queryRef =  mWilddogRef.child(messageID);
+////                mWilddogRef.orderByKey().startAt(messageID).limitToLast(20);
+////                mWilddogRef.orderByKey();
+////                mWilddogRef.limitToLast(20).startAt(messageID);
+////                notifyDataSetChanged();
+////                mModels.clear();
+////                mKeys.clear();
+//            }
+//            if (position == 0){
+//                String messageID = mModels.get(position).getMessageID();
+//
+//                Query temp = mRef.endAt(messageID).limitToLast(20);
+//                temp.addChildEventListener(mListener);
+//            }
             // 如果是文本类型的消息的话
             if (holder.getItemViewType() == 0) {
                 TextMessageViewHolder textViewHolder = (TextMessageViewHolder) holder;
@@ -626,6 +686,7 @@ public class ChatFragment extends BaseFragment {
                 params.gravity = Gravity.RIGHT;
             }
             layout.setLayoutParams(params);
+            new SaveThread(mChatMessage.getMessage(),(File)fileToEdit).start();
         }
 
         @Override
@@ -830,6 +891,78 @@ public class ChatFragment extends BaseFragment {
 
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private class LoadTextTask extends AsyncTask<File, Void, String> {
+        @Override
+        protected String doInBackground(File... files) {
+            String result = null;
+
+            if (files[0].exists()) {
+                BufferedReader br;
+
+                try {
+                    br = new BufferedReader(new FileReader(files[0]));
+
+                    try {
+                        StringBuilder sb = new StringBuilder();
+                        String line = br.readLine();
+
+                        while (line != null) {
+                            sb.append(line);
+                            sb.append("\n");
+                            line = br.readLine();
+                        }
+
+                        result = sb.toString();
+                    } finally {
+                        br.close();
+                    }
+                } catch (IOException e) {
+                    Log.e(getClass().getSimpleName(), "Exception reading file", e);
+                }
+            }
+
+            return (result);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+//            editor.setText(s);
+            loadTask = null;
+            loaded = true;
+        }
+    }
+
+    private static class SaveThread extends Thread {
+        private final String text;
+        private final File fileToEdit;
+
+        SaveThread(String text, File fileToEdit) {
+            this.text = text;
+            this.fileToEdit = fileToEdit;
+        }
+
+        @Override
+        public void run() {
+            try {
+                fileToEdit.getParentFile().mkdirs();
+
+                FileOutputStream fos = new FileOutputStream(fileToEdit);
+
+                Writer w = new BufferedWriter(new OutputStreamWriter(fos));
+
+                try {
+                    w.write(text);
+                    w.flush();
+                    fos.getFD().sync();
+                } finally {
+                    w.close();
+                }
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), "Exception writing file", e);
             }
         }
     }
