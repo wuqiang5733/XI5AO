@@ -56,11 +56,12 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.wilddog.client:wilddog-sync-android:2.2.0'
+    compile 'com.wilddog.client:wilddog-auth-android:2.0.5'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+//    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 // Because RxAndroid releases are few and far between, it is recommended you also
 // explicitly depend on RxJava's latest version for bug fixes and new features.
-    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
+//    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
 }
