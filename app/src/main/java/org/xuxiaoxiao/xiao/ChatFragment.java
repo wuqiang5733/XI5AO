@@ -67,6 +67,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -943,6 +945,9 @@ public class ChatFragment extends BaseFragment {
     }
 
     private static class SaveThread extends Thread {
+        // 开启一个线程
+        // 保存聊天记录到本地
+        private static Lock lock = new ReentrantLock();
         private final String text;
         private final File fileToEdit;
 
@@ -953,6 +958,8 @@ public class ChatFragment extends BaseFragment {
 
         @Override
         public void run() {
+            // 加上同步锁，防止多次写入
+            lock.lock();
             try {
 //                fileToEdit.getParentFile().mkdirs();
                 // 加上 true 就是追加内容
@@ -966,6 +973,8 @@ public class ChatFragment extends BaseFragment {
                     fos.getFD().sync();
                 } finally {
                     w.close();
+                    // 释放同步锁
+                    lock.unlock();
                 }
             } catch (IOException e) {
                 Log.e(getClass().getSimpleName(), "Exception writing file", e);

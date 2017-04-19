@@ -6,11 +6,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import org.xuxiaoxiao.xiao.infrastructure.BaseAuthenticatedActivity;
 
 import java.util.ArrayList;
 
-public abstract class UniversalFragmentActivity extends AppCompatActivity {
+public abstract class UniversalFragmentActivity extends BaseAuthenticatedActivity {
 
     abstract protected String[] getDesiredPermissions();
 
@@ -33,8 +34,8 @@ public abstract class UniversalFragmentActivity extends AppCompatActivity {
 //    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onXiaoCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fragment);
 
         FragmentManager fm = getSupportFragmentManager();

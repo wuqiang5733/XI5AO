@@ -13,6 +13,7 @@
         android:name=".infrastructure.XiaoApplication"
         android:theme="@style/AppTheme">
         <activity android:name=".ChatActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,6 +21,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".chatconfig.ChatConfigActivity"></activity>
+        <activity android:name=".login.LoginActivity"
+            android:launchMode="singleTask"></activity>
+        <!--<activity android:name=".base.BaseActivity"></activity>-->
     </application>
 
 </manifest>
