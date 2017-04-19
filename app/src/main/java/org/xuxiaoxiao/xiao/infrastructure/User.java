@@ -5,11 +5,16 @@ package org.xuxiaoxiao.xiao.infrastructure;
  */
 
 public class User {
-    private String name;
-    private boolean isLoggedIn;
 
-    public User(String name) {
+    private String name;
+    private String email;
+    private String photoUrl;
+    private String uid;
+    private boolean isLoggedIn = true;
+
+    public User(String name,String email) {
         this.name = name;
+        this.email = email;
     }
 
     public String getName() {
@@ -26,5 +31,29 @@ public class User {
 
     public void setLoggedIn(boolean loggedIn) {
         isLoggedIn = loggedIn;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

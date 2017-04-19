@@ -4,6 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import com.wilddog.wilddogauth.WilddogAuth;
+import com.wilddog.wilddogauth.model.WilddogUser;
+import com.wilddog.wilddogcore.WilddogApp;
+
 import org.xuxiaoxiao.xiao.infrastructure.SoundPool;
 import org.xuxiaoxiao.xiao.infrastructure.User;
 import org.xuxiaoxiao.xiao.infrastructure.XiaoApplication;
@@ -18,6 +22,9 @@ public class BaseFragment extends Fragment {
     protected User user;
     protected SoundPool soundPool;
 //    protected SyncReference mWilddogRef;
+    WilddogApp wilddogApp;
+    protected WilddogAuth wilddogAuth;
+   protected WilddogUser wUser;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,6 +34,8 @@ public class BaseFragment extends Fragment {
         soundPool = application.getSoundPool();
         // Setup our Wilddog mWilddogRef
 //        mWilddogRef = WilddogSync.getInstance().getReference().child("chat");
+        this.wUser = application.getwUser();
+        wilddogAuth = application.getWilddogAuth();
     }
 
 }

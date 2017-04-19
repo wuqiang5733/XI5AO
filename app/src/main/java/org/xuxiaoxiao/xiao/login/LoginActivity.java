@@ -41,13 +41,13 @@ public class LoginActivity extends BaseActivity {
         final EditText email = (EditText) findViewById(R.id.login_email);
         final EditText passWord = (EditText) findViewById(R.id.login_password);
         Button registerButton = (Button) findViewById(R.id.register_button);
-        Button queryButton = (Button)findViewById(R.id.query_button);
-        final TextView uidTextView = (TextView)findViewById(R.id.uid);
-        final TextView providerIdTextView = (TextView)findViewById(R.id.providerId);
-        final TextView phoneTextView = (TextView)findViewById(R.id.phone);
-        final TextView nameTextView = (TextView)findViewById(R.id.name);
-        final TextView photoUrlTextView = (TextView)findViewById(R.id.photoUrl);
-        final TextView emialTextView = (TextView)findViewById(R.id.email);
+        Button queryButton = (Button) findViewById(R.id.query_button);
+        final TextView uidTextView = (TextView) findViewById(R.id.uid);
+        final TextView providerIdTextView = (TextView) findViewById(R.id.providerId);
+        final TextView phoneTextView = (TextView) findViewById(R.id.phone);
+        final TextView nameTextView = (TextView) findViewById(R.id.name);
+        final TextView photoUrlTextView = (TextView) findViewById(R.id.photoUrl);
+        final TextView emialTextView = (TextView) findViewById(R.id.email);
 
         final Intent intent = new Intent(this, ChatActivity.class);
 
@@ -64,18 +64,23 @@ public class LoginActivity extends BaseActivity {
                 }
                 wilddogAuth.signInWithEmailAndPassword(emailStr, passWordStr)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(Task<AuthResult> var1) {
-                        if (var1.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
-                            Log.d("success", "Login success!");  // 登录成功
-                            Log.d("Anonymous", String.valueOf(var1.getResult().getWilddogUser().isAnonymous()));
-                        } else {
-                            Toast.makeText(getApplicationContext(), "登陆失败", Toast.LENGTH_SHORT).show();
-                            Log.d("failure", "reason:" + var1.getException().toString()); // 登录失败及错误信息
-                        }
-                    }
-                });
+                            @Override
+                            public void onComplete(Task<AuthResult> var1) {
+                                if (var1.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
+                                    Log.d("success", "Login success!");  // 登录成功
+
+                                    application.getUser().setLoggedIn(true);
+                                    startActivity(intent);
+                                    finish();
+
+                                    Log.d("Anonymous", String.valueOf(var1.getResult().getWilddogUser().isAnonymous()));
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "登陆失败", Toast.LENGTH_SHORT).show();
+                                    Log.d("failure", "reason:" + var1.getException().toString()); // 登录失败及错误信息
+                                }
+                            }
+                        });
 
 //                Log.d("LoginActivity", "你登陆了 。。。 ");
 //                application.getUser().setLoggedIn(true);

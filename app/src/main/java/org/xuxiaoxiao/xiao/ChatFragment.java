@@ -144,7 +144,7 @@ public class ChatFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_main);
-
+//        wUser.getEmail();
         // Make sure we have a mUsername
 //        setupUsername();
 
