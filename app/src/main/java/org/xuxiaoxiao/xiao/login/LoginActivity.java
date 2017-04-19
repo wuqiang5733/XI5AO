@@ -10,6 +10,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.wilddog.wilddogauth.WilddogAuth;
+import com.wilddog.wilddogauth.core.Task;
+import com.wilddog.wilddogauth.core.listener.OnCompleteListener;
+import com.wilddog.wilddogauth.core.result.AuthResult;
 
 import org.xuxiaoxiao.xiao.ChatActivity;
 import org.xuxiaoxiao.xiao.R;
@@ -24,6 +27,7 @@ import java.util.regex.Pattern;
 
 public class LoginActivity extends BaseActivity {
     WilddogAuth wilddogAuth;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,16 +35,16 @@ public class LoginActivity extends BaseActivity {
 
         wilddogAuth = WilddogAuth.getInstance();
 
-        final EditText email = (EditText)findViewById(R.id.login_email);
-        final EditText passWord = (EditText)findViewById(R.id.login_password);
-        Button registerButton = (Button)findViewById(R.id.register_button);
+        final EditText email = (EditText) findViewById(R.id.login_email);
+        final EditText passWord = (EditText) findViewById(R.id.login_password);
+        Button registerButton = (Button) findViewById(R.id.register_button);
 
-        final Intent intent = new Intent(this,ChatActivity.class);
+        final Intent intent = new Intent(this, ChatActivity.class);
 
         findViewById(R.id.login_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("LoginActivity","你登陆了 。。。 ");
+                Log.d("LoginActivity", "你登陆了 。。。 ");
                 application.getUser().setLoggedIn(true);
                 startActivity(intent);
                 finish();
@@ -50,37 +54,47 @@ public class LoginActivity extends BaseActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               String emailStr = email.getText().toString().trim();
-               String passWordStr = passWord.getText().toString().trim();
-                if(!isEmailValid(emailStr)){
+                String emailStr = email.getText().toString().trim();
+                String passWordStr = passWord.getText().toString().trim();
+                if (!isEmailValid(emailStr)) {
                     email.setError("格式不正确");
                 }
-                if (passWordStr.length()<8){
+                if (passWordStr.length() < 8) {
                     passWord.setError("长度不能小于8");
                 }
-
-                Toast.makeText(getApplicationContext(),emailStr + passWordStr ,Toast.LENGTH_SHORT).show();
+                wilddogAuth.createUserWithEmailAndPassword(emailStr,passWordStr).
+                        addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(Task<AuthResult> var1) {
+                                if (var1.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(),"注册成功",Toast.LENGTH_SHORT).show();
+                                    Log.d("result", "Create user success");
+                                } else {
+                                    Toast.makeText(getApplicationContext(),"注册失败",Toast.LENGTH_SHORT).show();
+                                    Log.d("result", "reason:" + var1.getException().toString());
+                                }
+                            }
+                        });
             }
         });
 
     }
 
-    public boolean isEmailValid(String email)
-    {
+    public boolean isEmailValid(String email) {
         String regExpn =
                 "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
-                        +"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
-                        +"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-                        +"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+                        + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                        + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                        + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
 
         CharSequence inputStr = email;
 
-        Pattern pattern = Pattern.compile(regExpn,Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(regExpn, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(inputStr);
 
-        if(matcher.matches())
+        if (matcher.matches())
             return true;
         else
             return false;
