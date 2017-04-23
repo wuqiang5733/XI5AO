@@ -151,7 +151,15 @@ public class ChatFragment extends BaseFragment {
 //        setTitle("Chatting as " + mUsername);
 
         // Setup our Wilddog mWilddogRef
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }, 1000);
         mWilddogRef = WilddogSync.getInstance().getReference().child("chat");
+        user.setName("WQ");
+//        user.setName(wUser.getDisplayName());
 //        new DownloadTask().execute();
 //        new PutBmob().execute();
 //        new PutBmob().execute();
@@ -190,9 +198,9 @@ public class ChatFragment extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean connected = (Boolean) dataSnapshot.getValue();
                 if (connected) {
-                    Toast.makeText(getActivity(), "Connected to Wilddog", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "连接到服务器", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getActivity(), "Disconnected from Wilddog", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "从服务器断开", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -260,10 +268,15 @@ public class ChatFragment extends BaseFragment {
             String key = mWilddogRef.push().getKey();
             ChatMessage chat = new ChatMessage(input, user.getName(), key, 0, "T");
             mWilddogRef.child(key).setValue(chat);
+            mWilddogRef.push().setValue(chat);
             inputText.setText("");
         }
     }
-
+/**
+ * 下面这个 方法是完全可行的
+ * Chat msg = new Chat("puf", "1234", "Hello FirebaseUI world!");
+ ref.push().setValue(msg);
+ */
     /**
      *  mWilddogRef.push().setValue("Test1"); 
      *  ChatMessage chat = new ChatMessage(input, user.getName(), “这是消息内容”, 0, "T"); 
@@ -315,6 +328,7 @@ public class ChatFragment extends BaseFragment {
 //        return super.onCreateView(inflater, container, savedInstanceState);
         final View view = inflater.inflate(R.layout.chat_top_fragment, container, false);
         messageRecyclerView = (RecyclerView) view.findViewById(R.id.message_recycler_view);
+        messageRecyclerView.setHasFixedSize(true);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI();
 

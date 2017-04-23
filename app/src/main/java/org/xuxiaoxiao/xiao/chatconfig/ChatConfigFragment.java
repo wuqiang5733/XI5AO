@@ -72,7 +72,11 @@ public class ChatConfigFragment extends BaseFragment implements CompoundButton.O
         super.onDestroy();
         if (userNameEditText.getText() != null) {
             // 设置用户名
-            userName = userNameEditText.getText().toString();
+//            userName = userNameEditText.getText().toString();
+            userName = userNameEditText.getText().toString().trim();
+            if (userName.length() < 2) {
+                userNameEditText.setError("太短了，亲");
+            }
             user.setName(userName);
         }
     }
@@ -95,9 +99,15 @@ public class ChatConfigFragment extends BaseFragment implements CompoundButton.O
         switch (item.getItemId()) {
             // 转到配置页面
             case R.id.done:
-                TaskClass task = new TaskClass();
-                Thread thread = new Thread(task);
-                thread.start();
+                userName = userNameEditText.getText().toString().trim();
+                if (userName.length() < 2) {
+                    userNameEditText.setError("太短了，亲");
+                }
+                if (userName.length() >= 2) {
+                    TaskClass task = new TaskClass(userName);
+                    Thread thread = new Thread(task);
+                    thread.start();
+                }
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -106,14 +116,16 @@ public class ChatConfigFragment extends BaseFragment implements CompoundButton.O
     }
 
     private class TaskClass implements Runnable {
-        public TaskClass() {
+        String name;
+        public TaskClass(String name) {
+            this.name = name;
         }
 
         @Override
         public void run() {
             WilddogUser user = wilddogAuth.getCurrentUser();
             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                    .setDisplayName("name7575")
+                    .setDisplayName(name)
                     .setPhotoUri(Uri.parse("https://example.com/path/photo.jpg7575"))
                     .build();
             user.updateProfile(profileUpdates)

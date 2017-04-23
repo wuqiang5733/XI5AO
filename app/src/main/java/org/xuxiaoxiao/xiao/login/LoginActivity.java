@@ -62,25 +62,28 @@ public class LoginActivity extends BaseActivity {
                 if (passWordStr.length() < 8) {
                     passWord.setError("长度不能小于8");
                 }
-                wilddogAuth.signInWithEmailAndPassword(emailStr, passWordStr)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(Task<AuthResult> var1) {
-                                if (var1.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
-                                    Log.d("success", "Login success!");  // 登录成功
+                if ((isEmailValid(emailStr)) && (passWordStr.length() >= 8)) {
+                    wilddogAuth.signInWithEmailAndPassword(emailStr, passWordStr)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(Task<AuthResult> var1) {
+                                    if (var1.isSuccessful()) {
+                                        Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
+                                        Log.d("success", "Login success!");  // 登录成功
 
-                                    application.getUser().setLoggedIn(true);
-                                    startActivity(intent);
-                                    finish();
+                                        application.getUser().setLoggedIn(true);
+                                        startActivity(intent);
+                                        finish();
 
-                                    Log.d("Anonymous", String.valueOf(var1.getResult().getWilddogUser().isAnonymous()));
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "登陆失败", Toast.LENGTH_SHORT).show();
-                                    Log.d("failure", "reason:" + var1.getException().toString()); // 登录失败及错误信息
+                                        Log.d("Anonymous", String.valueOf(var1.getResult().getWilddogUser().isAnonymous()));
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "登陆失败", Toast.LENGTH_SHORT).show();
+                                        Log.d("failure", "reason:" + var1.getException().toString()); // 登录失败及错误信息
+                                    }
                                 }
-                            }
-                        });
+                            });
+                }
+
 
 //                Log.d("LoginActivity", "你登陆了 。。。 ");
 //                application.getUser().setLoggedIn(true);
@@ -100,19 +103,22 @@ public class LoginActivity extends BaseActivity {
                 if (passWordStr.length() < 8) {
                     passWord.setError("长度不能小于8");
                 }
-                wilddogAuth.createUserWithEmailAndPassword(emailStr, passWordStr).
-                        addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(Task<AuthResult> var1) {
-                                if (var1.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "注册成功", Toast.LENGTH_SHORT).show();
+                if ((isEmailValid(emailStr)) && (passWordStr.length() >= 8)) {
+                    wilddogAuth.createUserWithEmailAndPassword(emailStr, passWordStr).
+                            addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(Task<AuthResult> var1) {
+                                    if (var1.isSuccessful()) {
+                                        Toast.makeText(getApplicationContext(), "注册成功", Toast.LENGTH_SHORT).show();
 //                                    Log.d("result", "Create user success");
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "注册失败", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "注册失败", Toast.LENGTH_SHORT).show();
 //                                    Log.d("result", "reason:" + var1.getException().toString());
+                                    }
                                 }
-                            }
-                        });
+                            });
+                }
+
             }
         });
 
